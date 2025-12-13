@@ -23,30 +23,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Вимикаємо CSRF (для API це ок)
-                .cors(Customizer.withDefaults())       // Вмикаємо CORS (налаштування внизу в біні)
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults()) // Активуємо CORS
                 .authorizeHttpRequests(auth -> auth
-                        // --- ПУБЛІЧНА ЗОНА (Дані для сайту, які бачать усі) ---
-                        // Дозволяємо отримувати (GET) інформацію для випадаючих списків і пошуку:
+                        // 👇 ВІДКРИВАЄМО ДОСТУП ДО ВСІХ /api/ ЗАПИТІВ (GET)
                         .requestMatchers(HttpMethod.GET, "/api/trips/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/routes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/buses/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/route-points/**").permitAll() // Важливо для точок маршруту
+                        .requestMatchers(HttpMethod.GET, "/api/route-points/**").permitAll()
 
-                        // Pre-flight запити браузера (технічні)
+                        // Дозволяємо реєстрацію та логін
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+
+                        // Технічні запити браузера
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // --- РЕЄСТРАЦІЯ ТА ВХІД ---
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll() // Якщо є логін
-
-                        // --- ПРИВАТНА ЗОНА (Тільки для авторизованих) ---
-                        .requestMatchers("/api/auth/**").authenticated()   // Профіль користувача
-                        .requestMatchers("/api/tickets/**").authenticated() // Купівля квитків
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Адмінка
-
-                        // Всі інші запити блокуємо
+                        // Все інше вимагає входу
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
@@ -54,25 +47,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 👇 ОСЬ ЦЕ ВИРІШУЄ ПРОБЛЕМУ З CORS І ЧЕРВОНИМИ ПОМИЛКАМИ В КОНСОЛІ
+    // 👇 НАЛАШТУВАННЯ CORS (Щоб Netlify міг брати дані)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 1. Дозволяємо конкретно ваш сайт на Netlify і локалку (для тестів)
-        configuration.setAllowedOrigins(List.of(
-                "https://iridescent-gecko-ab947c.netlify.app",
-                "http://localhost:5173",
-                "http://localhost:3000"
-        ));
+        // Дозволяємо всім (найпростіший варіант, щоб точно запрацювало)
+        configuration.setAllowedOriginPatterns(List.of("*"));
 
-        // 2. Дозволяємо всі методи
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // 3. Дозволяємо всі заголовки
         configuration.setAllowedHeaders(List.of("*"));
-
-        // 4. ДОЗВОЛЯЄМО КРЕДЕНШЕЛИ (Cookie, Auth headers) - це важливо!
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -21,7 +21,7 @@ public class RoutePoint {
     private int idPoint;
 
     @ManyToOne
-    @JsonIgnore
+   // @JsonIgnore
     @JoinColumn(name = "route_id", nullable = false)
     private Route route;
 
@@ -35,7 +35,6 @@ public class RoutePoint {
     // Виправив 'prise' на 'price' :)
     @Column(name = "cumulative_price")
     private Double price;
-    
 
     @Column(name = "arrival_time")
     private LocalTime arrivalTime;   // Коли автобус приїжджає сюди

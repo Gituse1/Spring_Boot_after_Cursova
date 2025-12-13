@@ -1,6 +1,5 @@
 package com.example.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,15 +22,14 @@ public class Route {
     @Column(name = "name_route")
     private String nameRoute;
 
-    // --- НОВІ ПОЛЯ ---
-
     @Column(name = "start_time")
-    private LocalTime startTime; // Час відправлення з першої точки
+    private LocalTime startTime;
 
     @Column(name = "end_time")
-    private LocalTime endTime;   // Час прибуття в останню точку
+    private LocalTime endTime;
 
-    // Цей список дозволить тобі дістати всі зупинки маршруту однією командою
-    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL)
+    // 👇 ДОДАЙ fetch = FetchType.EAGER
+    // Це каже: "Коли вантажиш Маршрут, одразу тягни і всі його Точки!"
+    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RoutePoint> routePoints;
 }

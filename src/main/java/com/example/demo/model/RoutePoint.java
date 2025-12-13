@@ -34,14 +34,23 @@ public class RoutePoint {
 
     // Виправив 'prise' на 'price' :)
     @Column(name = "cumulative_price")
-    private double price;
-
-    // --- НОВІ ПОЛЯ ---
+    private Double price;
+    
 
     @Column(name = "arrival_time")
     private LocalTime arrivalTime;   // Коли автобус приїжджає сюди
 
     @Column(name = "departure_time")
     private LocalTime departureTime; // Коли автобус їде звідси
+
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
 }
 

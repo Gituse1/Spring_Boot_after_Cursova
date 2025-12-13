@@ -61,7 +61,7 @@ public class AdminService implements AdminServiceInterface {
             point.setRoute(route);
             point.setCity(city);
             point.setOrderIndex(orderIndex);
-            point.setPrice((int) pointDto.getPriceFromStart());
+            point.setPrice( pointDto.getPriceFromStart());
 
             routePointRepository.save(point);
         }

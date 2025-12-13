@@ -12,15 +12,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/trips")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*") // <--- ДОДАЙТЕ ЦЕЙ РЯДОК ОБОВ'ЯЗКОВО!
 public class TripController {
 
     private final TripService tripService;
 
-    // --- БУЛО: testConnection ---
-    // --- СТАЛО: Отримання списку рейсів ---
     @GetMapping
     public ResponseEntity<List<Trip>> getAllTrips() {
-        // Цей метод ми зараз додамо в сервіс
         return ResponseEntity.ok(tripService.getAllTrips());
     }
 
@@ -29,11 +27,12 @@ public class TripController {
         Trip newTrip = tripService.createTrip(tripRequest);
         return ResponseEntity.ok(newTrip);
     }
+
     @GetMapping("/search")
     public ResponseEntity<List<Trip>> searchTrips(
-            @RequestParam(required = false) Long fromCityId, // <-- Змінено
-            @RequestParam(required = false) Long toCityId,   // <-- Змінено
-            @RequestParam(required = false) String date) {   // <-- Змінено
+            @RequestParam(required = false) Long fromCityId,
+            @RequestParam(required = false) Long toCityId,
+            @RequestParam(required = false) String date) {
 
         return ResponseEntity.ok(tripService.searchTrips(fromCityId, toCityId, date));
     }

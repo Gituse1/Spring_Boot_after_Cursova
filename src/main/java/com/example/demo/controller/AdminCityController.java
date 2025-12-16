@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/cities")
@@ -52,7 +53,19 @@ public class AdminCityController {
         City updatedCity = cityRepository.save(city);
         return ResponseEntity.ok(updatedCity);
     }
+    @PatchMapping ("/{id}")
+    public ResponseEntity<City> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates){
+       String newName= updates.get("name");
 
-    // 4. Видалити місто (DELETE)
+       if(newName==null || newName.isEmpty()){
+           return ResponseEntity.badRequest().build();
+       }
+       City city = cityRepository.findById(id).orElseThrow(()-> new RuntimeException("Місто не знайдено"));
+
+       city.setName(newName);
+       City updateCity = cityRepository.save(city);
+       return ResponseEntity.ok((City) updateCity);
+    }
+
 
 }

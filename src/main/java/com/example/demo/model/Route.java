@@ -28,8 +28,7 @@ public class Route {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-    // 👇 ДОДАЙ fetch = FetchType.EAGER
-    // Це каже: "Коли вантажиш Маршрут, одразу тягни і всі його Точки!"
+
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RoutePoint> routePoints;
 }

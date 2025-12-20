@@ -29,3 +29,6 @@ git branch -d new-feature
 
 
 git status
+git add .
+git commit -m
+git push

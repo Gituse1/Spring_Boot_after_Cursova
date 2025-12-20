@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.TicketRequest;
 import com.example.demo.model.Ticket;
+import com.example.demo.model.User;
 import com.example.demo.repository.TicketRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +22,8 @@ import java.util.List;
 public class TicketController {
     private final TicketService ticketService;
     private  final TicketRepository ticketRepository;
+    private  final Principal principal;
+    private  final UserRepository userRepository;
 
     @PostMapping
     // Додаємо аргумент Authentication authentication
@@ -78,8 +83,10 @@ public class TicketController {
             return ResponseEntity.badRequest().build();
         }
       Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
-        if(ticket!=null){
+        User user= userRepository.findUserByUserName(principal.getName());
+        if(ticket!=null&& ticket.getUser()==user){
             ticketRepository.deleteById((long) ticket.getIdTicket());
+
             return ResponseEntity.noContent().build();
         }
         else {

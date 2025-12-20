@@ -33,7 +33,7 @@ public class Ticket {
     private RoutePoint endPoint;
 
     @Column(name = "seat_number")
-    private String seatNumber;
+    private int seatNumber;
 
     @Column(nullable = false)
     private int price;

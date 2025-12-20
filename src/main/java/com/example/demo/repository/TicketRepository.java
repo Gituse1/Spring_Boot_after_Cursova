@@ -16,11 +16,14 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
             "FROM Ticket t WHERE t.trip.idTrip = :tripId " +
             "AND t.seatNumber = :seatNumber")
     boolean checkSeatIsTaken(@Param("tripId") Long tripId,
-                             @Param("seatNumber") String seatNumber);
+                             @Param("seatNumber") int seatNumber);
 
     @Query("SELECT t.seatNumber FROM Ticket t WHERE t.trip.idTrip = :tripId")
     List<String> findTakenSeatsByTripId(@Param("tripId") Long tripId);
 
     List<Ticket> findByUser(User user);
+
+    @Query("SELECT t FROM Ticket t WHERE t.trip.idTrip = :tripId and t.seat_number =:seatNumber")
+    Ticket findTakenByTripIdAndSeats(@Param("tripId") Long tripId,@Param("seatNumber") int seatNumber);
 
 }

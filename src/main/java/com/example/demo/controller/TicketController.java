@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.TicketRequest;
 import com.example.demo.model.Ticket;
+import com.example.demo.repository.TicketRepository;
 import com.example.demo.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TicketController {
     private final TicketService ticketService;
+    private  final TicketRepository ticketRepository;
 
     @PostMapping
     // Додаємо аргумент Authentication authentication
@@ -58,4 +60,31 @@ public class TicketController {
             return ResponseEntity.status(404).body(Collections.emptyList());
         }
     }
+
+    @DeleteMapping("/<id>")
+    public ResponseEntity<?> deleteTicket(@PathVariable long id){
+        if(ticketRepository.existsById(id)){
+            ticketRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        else {
+            throw new RuntimeException("Даний квиток не занйдено");
+        }
+    }
+
+    @DeleteMapping("/{tripId}/{seatNumber}")
+    public ResponseEntity<?> deleteTicket(@PathVariable long tripId, @PathVariable int seatNumber){
+        if(tripId==0||seatNumber==0){
+            return ResponseEntity.badRequest().build();
+        }
+      Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
+        if(ticket!=null){
+            ticketRepository.deleteById((long) ticket.getIdTicket());
+            return ResponseEntity.noContent().build();
+        }
+        else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

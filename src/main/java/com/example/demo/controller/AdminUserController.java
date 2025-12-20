@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/admin")
 public class AdminUserController {
 
-    UserRepository userRepository;
+   private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUser(){

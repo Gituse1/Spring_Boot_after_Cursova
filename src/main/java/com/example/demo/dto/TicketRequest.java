@@ -10,5 +10,5 @@ public class TicketRequest {
     private Long userId;
     private Long startPointId;
     private Long endPointId;
-    private String seatNumber;
+    private int seatNumber;
 }

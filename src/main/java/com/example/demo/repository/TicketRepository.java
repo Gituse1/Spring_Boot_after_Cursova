@@ -23,7 +23,7 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
 
     List<Ticket> findByUser(User user);
 
-    @Query("SELECT t FROM Ticket t WHERE t.trip.idTrip = :tripId and t.seat_number =:seatNumber")
+    @Query("SELECT t FROM Ticket t WHERE t.trip.idTrip = :tripId and t.seatNumber =:seatNumber")
     Ticket findTakenByTripIdAndSeats(@Param("tripId") Long tripId,@Param("seatNumber") int seatNumber);
 
 }

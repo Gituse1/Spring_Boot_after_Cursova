@@ -86,7 +86,7 @@ public class TicketService implements TicketServiceInterface {
 
     // Допоміжний метод для отримання зайнятих місць
     public List<String> getTakenSeats(Long tripId) {
-        return ticketRepository.findTaketSeatsByTripId(tripId);
+        return ticketRepository.findTakenSeatsByTripId(tripId);
     }
 
     public List<Ticket> findTicketsByUserEmail(String email) {

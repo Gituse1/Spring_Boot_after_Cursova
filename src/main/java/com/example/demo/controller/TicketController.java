@@ -36,7 +36,6 @@ public class TicketController {
             System.out.println("Квиток купує: " + currentUserEmail);
 
             // 2. Передаємо цей email у сервіс (тобі треба буде трохи змінити метод у сервісі)
-            // Замість request.getUserId(), ми знайдемо юзера по email
             Ticket newTicket = ticketService.buyTicket(ticketRequest, currentUserEmail);
 
             return ResponseEntity.ok(newTicket);

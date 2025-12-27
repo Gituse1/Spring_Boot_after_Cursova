@@ -3,8 +3,8 @@ package com.example.demo.controller;
 
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.AdminUserService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,32 +16,38 @@ import java.util.List;
 public class AdminUserController {
 
    private final UserRepository userRepository;
+   AdminUserService adminUserService;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUser(){
         return ResponseEntity.ok(userRepository.findAll());
     }
-    @DeleteMapping
-    public ResponseEntity<HttpStatus> deleteUser(@RequestBody long id){
-        if(userRepository.existsById(id)){
-            userRepository.deleteById(id);
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable long id){
+        try{
+            adminUserService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        else{
-            throw new RuntimeException("Користувача не знайдено ");
+        catch (RuntimeException e) {
+            return ResponseEntity.notFound().build(); // 404
         }
-        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable long id ,@RequestBody User userDetails){
-        User user = userRepository.
-                findById(id).orElseThrow(() -> new RuntimeException("КОристувач не знайдений"));
+        @PutMapping("/{id}")
+        public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User userDetails) {
+            try {
+                User newUser = adminUserService.updateUser(id, userDetails);
+                return ResponseEntity.ok(newUser);
 
-        user.setName(userDetails.getName());
-        User updateUser= userRepository.save(user);
-
-        return ResponseEntity.ok(updateUser);
-    }
-
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            } catch (RuntimeException e) { // 👇 Ловимо помилку "Не знайдено"
+                return ResponseEntity.notFound().build(); // 404
+            }
+        }
 
 }

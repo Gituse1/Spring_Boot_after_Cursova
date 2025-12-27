@@ -17,7 +17,7 @@ import java.util.Map;
 public class AdminCityController {
 
     private final CityRepository cityRepository;
-    private final AdminCityService adminCityService
+    private final AdminCityService adminCityService;
 
     //  Створити нове місто (POST)
     @PostMapping
@@ -42,37 +42,39 @@ public class AdminCityController {
     //  Видалити місто (DELETE)
     @DeleteMapping
     public ResponseEntity<HttpStatus>deleteCity(@PathVariable Long id){
-        if(!cityRepository.existsById(id)){
-            cityRepository.deleteById(id);
-        }
-        else{
-            throw  new RuntimeException("Такого місця не існує");
-        }
-        return ResponseEntity.noContent().build();
+
+       try {
+           adminCityService.deleteCity(id);
+           return ResponseEntity.ok().build();
+       }
+       catch (IllegalArgumentException e){
+           throw  new RuntimeException("Такого місця не існує");
+       }
+
     }
 
     //  Оновити місто (PUT)
     @PutMapping("/{id}")
     public ResponseEntity<City> updateCity(@PathVariable Long id, @RequestBody City cityDetails) {
-        City city = cityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Місто не знайдено"));
-
-        city.setName(cityDetails.getName());
-        City updatedCity = cityRepository.save(city);
-        return ResponseEntity.ok(updatedCity);
+        try {
+            City updateCity = adminCityService.updateCity(id, cityDetails);
+            return ResponseEntity.ok(updateCity);
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.notFound().build();
+        }
     }
+
     @PatchMapping ("/{id}")
-    public ResponseEntity<City> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates){
-       String newName= updates.get("name");
-
-       if(newName==null || newName.isEmpty()){
-           return ResponseEntity.badRequest().build();
-       }
-       City city = cityRepository.findById(id).orElseThrow(()-> new RuntimeException("Місто не знайдено"));
-
-       city.setName(newName);
-       City updateCity = cityRepository.save(city);
-       return ResponseEntity.ok((City) updateCity);
+    public ResponseEntity<?> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates) {
+        try {
+            City updateCity = adminCityService.updateCityName(id, updates);
+            return ResponseEntity.ok(updateCity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (NullPointerException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 

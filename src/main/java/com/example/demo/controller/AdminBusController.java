@@ -3,6 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Bus;
 import com.example.demo.repository.BusRepository;
+import com.example.demo.service.AdminBusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class AdminBusController {
 
    private final BusRepository busRepository ;
+   private final AdminBusService adminBusService;
 
    @GetMapping
     public ResponseEntity<List<Bus>> getAllBus(){
@@ -32,45 +34,37 @@ public class AdminBusController {
 
     @DeleteMapping
     public ResponseEntity<HttpStatus> deleteBus(@RequestBody long id){
-       if( busRepository.existsById(id) ){
-           busRepository.deleteById(id);
+       try{
+           adminBusService.deleteBus(id);
+           return ResponseEntity.noContent().build();
        }
-       else{
-           throw  new RuntimeException("Такого автобуса не знайдено");
+       catch (IllegalArgumentException e){
+           return ResponseEntity.badRequest().build();
        }
-       return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Bus> updateBus (@PathVariable long id, @RequestBody Bus newBus){
+    public ResponseEntity<?> updateBus (@PathVariable long id, @RequestBody Bus newBus){
+       try {
+           Bus updateBus = adminBusService.updateBus(id,newBus);
+           return ResponseEntity.ok(updateBus);
 
-       if((newBus.getPlateNumber() == null) || newBus.getTotalSeats() == 0 ) {
-           return ResponseEntity.badRequest().build();
+       }catch (IllegalArgumentException e){
+           return  ResponseEntity.notFound().build();
+       }catch (RuntimeException e){
+           return ResponseEntity.badRequest().body(e.getMessage());
        }
-
-        Bus exitingBus=busRepository.findById(id).orElseThrow(()-> new RuntimeException("Автобус з id " + id + " не знайдено"));
-
-        exitingBus.setPlateNumber(newBus.getPlateNumber());
-        exitingBus.setTotalSeats(newBus.getTotalSeats());
-
-        Bus updatedBus = busRepository.save(exitingBus);
-
-        return ResponseEntity.ok(updatedBus);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Bus> updateBusCapacity(@PathVariable long id, @RequestBody Map<String, Integer> updates){
-        Integer newCapacity = updates.get("capacity");
-
-       if(newCapacity== 0){
-           return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> updateBusCapacity(@PathVariable long id, @RequestBody Map<String, Integer> updates){
+       try {
+           Bus updateBus = adminBusService.updateBusCapacity(id,updates);
+           return ResponseEntity.ok(updateBus);
        }
-       Bus bus= busRepository.findById(id).orElseThrow(() -> new RuntimeException("Автобус не знайдено"));
-
-       bus.setTotalSeats(newCapacity);
-       Bus updateBus= busRepository.save(bus);
-       return ResponseEntity.ok(updateBus);
-
+       catch (IllegalArgumentException e){
+           return ResponseEntity.badRequest().body(e.getMessage());
+       }
     }
 
 }

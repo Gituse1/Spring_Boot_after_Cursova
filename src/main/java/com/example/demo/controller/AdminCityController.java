@@ -2,11 +2,11 @@ package com.example.demo.controller;
 
 import com.example.demo.model.City;
 import com.example.demo.repository.CityRepository;
+import com.example.demo.service.AdminCityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -17,12 +17,20 @@ import java.util.Map;
 public class AdminCityController {
 
     private final CityRepository cityRepository;
+    private final AdminCityService adminCityService
 
     //  Створити нове місто (POST)
     @PostMapping
     public ResponseEntity<City> createCity(@RequestBody City city) {
-        City savedCity = cityRepository.save(city);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCity);
+        try{
+            City newCity = adminCityService.createCity(city.getName());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(newCity);
+        }
+        catch (IllegalArgumentException e){
+            throw new RuntimeException("Таке місто вже існує");
+        }
+
     }
 
     //  Отримати всі міста (GET)
@@ -34,7 +42,7 @@ public class AdminCityController {
     //  Видалити місто (DELETE)
     @DeleteMapping
     public ResponseEntity<HttpStatus>deleteCity(@PathVariable Long id){
-        if(cityRepository.existsById(id)){
+        if(!cityRepository.existsById(id)){
             cityRepository.deleteById(id);
         }
         else{

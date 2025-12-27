@@ -18,13 +18,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TripService implements TripServiceInterface {
+public class TripService  {
 
     private final TripRepository tripRepository;
     private final RouteRepository routeRepository;
     private final BusRepository busRepository;
 
-    @Override
+
     public Trip createTrip(TripRequest request) {
 
         LocalDateTime startRange = request.getDepartureTime().minusHours(1);

@@ -1,29 +1,33 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.TicketRequest;
-import com.example.demo.model.RoutePoint;
-import com.example.demo.model.Ticket;
-import com.example.demo.model.Trip;
-import com.example.demo.model.User;
+import com.example.demo.model.*;
 import com.example.demo.repository.RoutePointRepository;
 import com.example.demo.repository.TicketRepository;
 import com.example.demo.repository.TripRepository;
 import com.example.demo.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.naming.NoInitialContextException;
+import java.security.Principal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TicketService implements TicketServiceInterface {
+public class TicketService  {
 
     private final TicketRepository ticketRepository;
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
     private final RoutePointRepository routePointRepository;
+    private final AuditService auditService;
 
     @Transactional
     public Ticket buyTicket(TicketRequest request, String email) {
@@ -96,5 +100,40 @@ public class TicketService implements TicketServiceInterface {
 
         // 2. Знаходимо всі квитки, прив'язані до цього об'єкта User
         return ticketRepository.findByUser(user);
+    }
+
+
+    public void deleteTicket( long tripId,  int seatNumber, Principal principal){
+        if(tripId==0||seatNumber==0){
+
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId + ", Seat: " + seatNumber,principal);
+            throw new  IllegalArgumentException("невірні дані");
+        }
+        Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
+        User user= userRepository.findUserByUserName(principal.getName());
+        if (ticket == null) {
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket not found", principal);
+            throw new RuntimeException("Квиток не знайдено");
+        }
+
+        if (!ticket.getUser().getIdUser().equals(user.getIdUser())) {
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId, principal);
+            throw new SecurityException("Це не ваш квиток!");
+        }
+
+        ticketRepository.deleteById((long) ticket.getIdTicket());
+        auditService.createNewLog(ActionType.DELETE_TICKET, true, "Trip ID: " + tripId, principal);
+    }
+
+
+    public void deleteTicket(@PathVariable long id,Principal principal){
+        if(!ticketRepository.existsById(id)){
+
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket ID: " + id + ", User: Admin ", principal);
+            throw  new IllegalArgumentException("Невірні данні id"+ id);
+        }
+        ticketRepository.deleteById(id);
+        auditService.createNewLog(ActionType.DELETE_TICKET, true, "Ticket ID: " + id + ", User: Admin ", principal);
+
     }
 }

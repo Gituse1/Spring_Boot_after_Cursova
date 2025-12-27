@@ -3,12 +3,13 @@ package com.example.demo.controller;
 import com.example.demo.dto.TicketRequest;
 import com.example.demo.model.ActionType;
 import com.example.demo.model.Ticket;
-import com.example.demo.model.User;
 import com.example.demo.repository.TicketRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.AuditService;
 import com.example.demo.service.TicketService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -66,76 +67,42 @@ public class TicketController {
     @GetMapping("/my")
     public ResponseEntity<List<Ticket>> getMyTickets(Authentication authentication) {
         try {
-            // Отримуємо email авторизованого користувача
-            String currentUserEmail = authentication.getName();
 
-            // Викликаємо сервіс для отримання квитків
+            String currentUserEmail = authentication.getName();
             List<Ticket> tickets = ticketService.findTicketsByUserEmail(currentUserEmail);
 
             return ResponseEntity.ok(tickets);
         } catch (Exception e) {
-            // Якщо користувача не знайдено (хоча це малоймовірно, якщо він авторизований)
+
             return ResponseEntity.status(404).body(Collections.emptyList());
         }
     }
 
     @DeleteMapping("/<id>")//Обмежити доступ тільки для адміна
     public ResponseEntity<?> deleteTicket(@PathVariable long id,Principal principal){
-        if(ticketRepository.existsById(id)){
-            ticketRepository.deleteById(id);
-
-            auditService.createNewLog(
-                    ActionType.DELETE_TICKET,
-                    false,
-                    "Ticket ID: " + id + ", User: Admin ",
-                    principal);
-
+        try{
+            ticketService.deleteTicket(id,principal);
             return ResponseEntity.noContent().build();
-        }
-        else {
-            auditService.createNewLog(
-                    ActionType.DELETE_TICKET,
-                    false,
-                    "Ticket ID: " + id + ", User: Admin ",
-                    principal);
-
-            throw new RuntimeException("Даний квиток не занйдено");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @DeleteMapping("/{tripId}/{seatNumber}")
-    public ResponseEntity<?> deleteTicket(@PathVariable long tripId, @PathVariable int seatNumber,Principal principal){
-        if(tripId==0||seatNumber==0){
+    public ResponseEntity<?> deleteTicket(@PathVariable long tripId, @PathVariable int seatNumber, Principal principal) {
+        try {
+            // Ми просто передаємо команду далі
+            ticketService.deleteTicket(tripId, seatNumber, principal);
 
-            auditService.createNewLog(
-                    ActionType.DELETE_TICKET,
-                    false,
-                    "Trip ID: " + tripId + ", Seat: " + seatNumber
-            ,principal);
-
-            return ResponseEntity.badRequest().build();
-        }
-      Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
-        User user= userRepository.findUserByUserName(principal.getName());
-        if(ticket!=null&& ticket.getUser().getIdUser().equals(user.getIdUser())){
-            ticketRepository.deleteById((long) ticket.getIdTicket());
-
-            auditService.createNewLog(
-                    ActionType.DELETE_TICKET,
-                    true,
-                    "Trip ID: " + tripId + ", Seat: " + seatNumber,
-                    principal);
-
+            // Якщо помилки не вилетіло — значить все добре
             return ResponseEntity.noContent().build();
-        }
-        else {
-            auditService.createNewLog(
-                    ActionType.DELETE_TICKET,
-                    false,
-                    "Trip ID: " + tripId + ", Seat: " + seatNumber,
-                    principal);
 
-            return ResponseEntity.notFound().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build(); // 404
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // 400
         }
     }
 

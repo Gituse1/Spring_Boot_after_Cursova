@@ -23,3 +23,5 @@
 [ ] Feature: Endpoint для особистого кабінету (/me).
 [ ] Testing: Написати мінімум 3-5 тестів для TicketService.
 [ ] Docs: Підключити Swagger.
+
+// додати зміну паролю

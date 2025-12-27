@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class AdminService implements AdminServiceInterface {
+public class AdminCityService {
 
     private final CityRepository cityRepository;
     private final BusRepository busRepository;
@@ -25,15 +25,15 @@ public class AdminService implements AdminServiceInterface {
         if (cityRepository.existsByName(name)) {
             throw new IllegalArgumentException("Місто з назвою '" + name + "' вже існує!");
         }
-
         // 2. Якщо немає - створюємо нове
         City city = new City();
         city.setName(name);
+        cityRepository.save(city);
 
-        return cityRepository.save(city);
+        return city;
     }
 
-    @Override
+
     public Bus createBus(String plateNumber, int capacity) {
         Bus bus = new Bus();
         bus.setPlateNumber(plateNumber);
@@ -42,7 +42,7 @@ public class AdminService implements AdminServiceInterface {
     }
 
     @Transactional
-    @Override
+
     public Route createRoute(RouteRequest request) {
         // 1. Створюємо "шапку" маршруту
         Route route = new Route();
@@ -68,7 +68,7 @@ public class AdminService implements AdminServiceInterface {
         return route;
     }
 
-    @Override
+
     public Trip scheduleTrip(Long routeId, Long busId, String departureTimeStr) {
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new RuntimeException("Route not found"));

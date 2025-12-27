@@ -117,7 +117,7 @@ public class TicketController {
         }
       Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
         User user= userRepository.findUserByUserName(principal.getName());
-        if(ticket!=null&& ticket.getUser()==user){
+        if(ticket!=null&& ticket.getUser().getIdUser().equals(user.getIdUser())){
             ticketRepository.deleteById((long) ticket.getIdTicket());
 
             auditService.createNewLog(

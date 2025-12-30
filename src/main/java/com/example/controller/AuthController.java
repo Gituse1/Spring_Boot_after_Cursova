@@ -1,7 +1,7 @@
 package com.example.controller;
 
-import com.example.dto.RegisterRequest; // Імпорт нового DTO
-import com.example.model.User;
+import com.example.dto.Request.RegisterRequest; // Імпорт нового DTO
+import com.example.dto.Response.UserResponse;
 import com.example.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +24,9 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<User> getCurrentUserDetails(Authentication authentication, Principal principal) {
+    public ResponseEntity<UserResponse> getCurrentUserDetails(Authentication authentication, Principal principal) {
 
-        User newUser = authService.getCurrentUserDetails(authentication, principal);
+        UserResponse newUser = authService.getCurrentUserDetails(authentication, principal);
         return ResponseEntity.ok(newUser);
 
     }
@@ -35,6 +35,7 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         authService.registerUser(request);
         return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
+
 
     }
 }

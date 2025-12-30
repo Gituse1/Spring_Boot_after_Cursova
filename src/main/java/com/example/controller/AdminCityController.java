@@ -53,7 +53,7 @@ public class AdminCityController {
     }
 
     @PatchMapping ("/{id}")
-    public ResponseEntity<?> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates) {
+    public ResponseEntity<City> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates) {
 
         City updateCity = adminCityService.updateCityName(id, updates);
         return ResponseEntity.ok(updateCity);

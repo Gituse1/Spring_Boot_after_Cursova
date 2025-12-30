@@ -1,10 +1,11 @@
 package com.example.service;
 
-import com.example.dto.RegisterRequest;
+import com.example.dto.Request.RegisterRequest;
 import com.example.mapper.UserMapper;
 import com.example.model.ActionType;
 import com.example.model.User;
 import com.example.repository.UserRepository;
+import com.example.dto.Response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class AuthService {
         auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + newUser.getId(), null);
     }
 
-    public User getCurrentUserDetails(Authentication authentication, Principal principal) {
+    public UserResponse getCurrentUserDetails(Authentication authentication, Principal principal) {
 
         String email = authentication.getName();
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -42,7 +43,7 @@ public class AuthService {
             throw new IllegalArgumentException("Користувача на знайдено");
 
         }
-        User user = userOptional.get();
+        UserResponse user = userMapper.toResponse(userOptional.get());
 
         auditService.createNewLog(ActionType.LOGIN, true, "Перегляд власного профілю", principal);
         return user;

@@ -27,4 +27,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Сталася помилка сервера: " + e.getMessage());
     }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<String> handleForbidden(SecurityException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
 }

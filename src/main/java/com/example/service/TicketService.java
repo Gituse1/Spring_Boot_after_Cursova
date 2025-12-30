@@ -1,7 +1,6 @@
 package com.example.service;
 
-import com.example.dto.TicketRequest;
-import com.example.model.*;
+import com.example.dto.Request.TicketRequest;
 import com.example.model.*;
 import com.example.repository.RoutePointRepository;
 import com.example.repository.TicketRepository;
@@ -27,62 +26,83 @@ public class TicketService  {
     private final AuditService auditService;
 
     @Transactional
-    public Ticket buyTicket(TicketRequest request, String email) {
+    public Ticket buyTicket(TicketRequest request, String email, Principal principal) {
+        try {
+            // --- Блок перевірок (Всередині try) ---
 
-        // 1. ВАЛІДАЦІЯ МІСЦЯ
-        boolean isSeatTaken = ticketRepository.checkSeatIsTaken(
-                request.getTripId(),
-                request.getSeatNumber()
-        );
+            boolean isSeatTaken = ticketRepository.checkSeatIsTaken(
+                    request.getTripId(),
+                    request.getSeatNumber()
+            );
 
-        if (isSeatTaken) {
-            throw new IllegalArgumentException("Місце " + request.getSeatNumber() + " вже зайняте!");
+            if (isSeatTaken) {
+                throw new IllegalArgumentException("Місце " + request.getSeatNumber() + " вже зайняте!");
+            }
+
+            Trip trip = tripRepository.findById(request.getTripId())
+                    .orElseThrow(() -> new EntityNotFoundException("Рейс не знайдено з ID: " + request.getTripId()));
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new EntityNotFoundException("Користувача з email " + email + " не знайдено"));
+
+            RoutePoint startPoint = routePointRepository.findById(request.getStartPointId())
+                    .orElseThrow(() -> new EntityNotFoundException("Точку відправлення не знайдено"));
+
+            RoutePoint endPoint = routePointRepository.findById(request.getEndPointId())
+                    .orElseThrow(() -> new EntityNotFoundException("Точку прибуття не знайдено"));
+
+            Long tripRouteId = trip.getRoute().getIdRoute();
+
+            if (!startPoint.getRoute().getIdRoute().equals(tripRouteId) ||
+                    !endPoint.getRoute().getIdRoute().equals(tripRouteId)) {
+                throw new IllegalArgumentException("Помилка! Обрані зупинки не належать до маршруту цього рейсу.");
+            }
+
+            if (startPoint.getOrderIndex() >= endPoint.getOrderIndex()) {
+                throw new IllegalArgumentException("Помилка! Пункт призначення має бути після пункту відправлення.");
+            }
+
+            int ticketPrice = (int) (endPoint.getPrice() - startPoint.getPrice());
+
+            if (ticketPrice <= 0) {
+                throw new IllegalArgumentException("Помилка розрахунку ціни: перевірте дані маршруту.");
+            }
+
+            // --- Збереження та успішний лог ---
+
+            Ticket ticket = new Ticket();
+            ticket.setTrip(trip);
+            ticket.setUser(user);
+            ticket.setStartPoint(startPoint);
+            ticket.setEndPoint(endPoint);
+            ticket.setSeatNumber(request.getSeatNumber());
+            ticket.setPrice(ticketPrice);
+
+            Ticket savedTicket = ticketRepository.save(ticket);
+
+            // Лог успіху
+            auditService.createNewLog(
+                    ActionType.BOOK_TICKET,
+                    true,
+                    "Ticket ID: " + savedTicket.getIdTicket() + ", User: " + principal.getName(),
+                    principal
+            );
+
+            return savedTicket;
+
+        } catch (Exception e) {
+            // --- Єдине місце для логування помилок ---
+
+            auditService.createNewLog(
+                    ActionType.BOOK_TICKET,
+                    false,
+                    "Ticket ID: None, Error: " + e.getMessage(), // Корисно додати текст помилки
+                    principal
+            );
+
+            // Обов'язково прокидаємо помилку далі, щоб контролер знав про збій
+            throw e;
         }
-
-        // 2. ОТРИМАННЯ СУТНОСТЕЙ
-        Trip trip = tripRepository.findById(request.getTripId())
-                .orElseThrow(() -> new EntityNotFoundException("Рейс не знайдено з ID: " + request.getTripId()));
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Користувача з email " + email + " не знайдено"));
-
-        // 3. ОТРИМАННЯ ТОЧОК МАРШРУТУ
-        RoutePoint startPoint = routePointRepository.findById(request.getStartPointId())
-                .orElseThrow(() -> new EntityNotFoundException("Точку відправлення не знайдено"));
-
-        RoutePoint endPoint = routePointRepository.findById(request.getEndPointId())
-                .orElseThrow(() -> new EntityNotFoundException("Точку прибуття не знайдено"));
-
-
-        // --- ВАЛІДАЦІЯ МАРШРУТУ ---
-        Long tripRouteId = trip.getRoute().getIdRoute();
-
-        if (!startPoint.getRoute().getIdRoute().equals(tripRouteId) ||
-                !endPoint.getRoute().getIdRoute().equals(tripRouteId)) {
-            throw new IllegalArgumentException("Помилка! Обрані зупинки не належать до маршруту цього рейсу.");
-        }
-
-        if (startPoint.getOrderIndex() >= endPoint.getOrderIndex()) {
-            throw new IllegalArgumentException("Помилка! Пункт призначення має бути після пункту відправлення.");
-        }
-
-        // 4. РОЗРАХУНОК ЦІНИ
-        int ticketPrice = (int) (endPoint.getPrice() - startPoint.getPrice());
-
-        if (ticketPrice <= 0) {
-            throw new IllegalArgumentException("Помилка розрахунку ціни: перевірте дані маршруту.");
-        }
-
-        // 5. СТВОРЕННЯ ТА ЗБЕРЕЖЕННЯ КВИТКА
-        Ticket ticket = new Ticket();
-        ticket.setTrip(trip);
-        ticket.setUser(user);
-        ticket.setStartPoint(startPoint);
-        ticket.setEndPoint(endPoint);
-        ticket.setSeatNumber(request.getSeatNumber());
-        ticket.setPrice(ticketPrice);
-
-        return ticketRepository.save(ticket);
     }
 
     // Допоміжний метод для отримання зайнятих місць

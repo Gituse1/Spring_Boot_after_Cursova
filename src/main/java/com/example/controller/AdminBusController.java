@@ -41,7 +41,7 @@ public class AdminBusController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBus (@PathVariable long id, @RequestBody Bus newBus){
+    public ResponseEntity<Bus> updateBus (@PathVariable long id, @RequestBody Bus newBus){
 
        Bus updateBus = adminBusService.updateBus(id,newBus);
        return ResponseEntity.ok(updateBus);
@@ -49,7 +49,7 @@ public class AdminBusController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateBusCapacity(@PathVariable long id, @RequestBody Map<String, Integer> updates){
+    public ResponseEntity<Bus> updateBusCapacity(@PathVariable long id, @RequestBody Map<String, Integer> updates){
 
        Bus updateBus = adminBusService.updateBusCapacity(id,updates);
        return ResponseEntity.ok(updateBus);

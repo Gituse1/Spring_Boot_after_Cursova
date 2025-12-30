@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.dto.TripRequest;
+import com.example.dto.Request.TripRequest;
 import com.example.model.Trip;
 import com.example.service.TripService;
 import lombok.RequiredArgsConstructor;

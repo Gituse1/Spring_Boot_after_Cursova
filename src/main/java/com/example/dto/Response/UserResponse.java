@@ -1,12 +1,14 @@
-package com.example.dto;
+package com.example.dto.Response;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterRequest {
+public class UserResponse  {
+
     private String name;
     private String email;
-    private String password;
+
+
 }

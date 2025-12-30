@@ -22,7 +22,7 @@ public class AdminAuditController {
         return ResponseEntity.ok(auditLogRepository.findAll());
     }
     @GetMapping("user/{userId}")
-    public ResponseEntity<?> getUserAuditLog(@PathVariable long userId){
+    public ResponseEntity<List<AuditLog>> getUserAuditLog(@PathVariable long userId){
 
         List<AuditLog> auditLogs = adminAuditService.getUserAuditLog(userId);
         return ResponseEntity.ok(auditLogs);

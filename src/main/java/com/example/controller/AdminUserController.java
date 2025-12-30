@@ -29,20 +29,14 @@ public class AdminUserController {
         adminUserService.deleteUser(id);
         return ResponseEntity.noContent().build();
 
-
     }
 
-        @PutMapping("/{id}")
-        public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User userDetails) {
-            try {
-                User newUser = adminUserService.updateUser(id, userDetails);
-                return ResponseEntity.ok(newUser);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User userDetails) {
 
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            } catch (RuntimeException e) { // 👇 Ловимо помилку "Не знайдено"
-                return ResponseEntity.notFound().build(); // 404
-            }
-        }
+        User newUser = adminUserService.updateUser(id, userDetails);
+        return ResponseEntity.ok(newUser);
+
+    }
 
 }

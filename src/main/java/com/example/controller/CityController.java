@@ -19,6 +19,7 @@ public class CityController {
 
     @GetMapping
     public ResponseEntity<List<City>> getAllCities() {
+
         return ResponseEntity.ok(cityRepository.findAll());
     }
 }

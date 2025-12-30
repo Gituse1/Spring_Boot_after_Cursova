@@ -1,8 +1,6 @@
-package com.example.dto;
+package com.example.dto.Request;
 
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class TicketRequest {

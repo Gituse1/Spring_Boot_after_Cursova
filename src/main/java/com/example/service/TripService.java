@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.dto.TripRequest;
+import com.example.dto.Request.TripRequest;
 import com.example.model.Bus;
 import com.example.model.Route;
 import com.example.model.RoutePoint;

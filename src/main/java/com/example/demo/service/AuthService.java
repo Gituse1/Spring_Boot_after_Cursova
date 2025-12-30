@@ -31,12 +31,11 @@ public class AuthService {
         User newUser = new User();
         newUser.setName(request.getName());
         newUser.setEmail(request.getEmail());
-        newUser.setRole("ROLE_USER");
 
         newUser.setPassword(request.getPassword());
 
         userRepository.save(newUser);
-        auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + newUser.getIdUser(), principal);
+        auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + newUser.getId(), principal);
 
     }
 

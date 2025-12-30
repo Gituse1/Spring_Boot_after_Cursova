@@ -8,14 +8,10 @@ import com.example.demo.repository.TripRepository;
 import com.example.demo.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.naming.NoInitialContextException;
 import java.security.Principal;
 import java.util.List;
 
@@ -116,7 +112,7 @@ public class TicketService  {
             throw new RuntimeException("Квиток не знайдено");
         }
 
-        if (!ticket.getUser().getIdUser().equals(user.getIdUser())) {
+        if (!ticket.getUser().getId().equals(user.getId())) {
             auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId, principal);
             throw new SecurityException("Це не ваш квиток!");
         }

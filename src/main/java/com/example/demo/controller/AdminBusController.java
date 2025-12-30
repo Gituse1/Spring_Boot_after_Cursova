@@ -34,37 +34,26 @@ public class AdminBusController {
 
     @DeleteMapping
     public ResponseEntity<HttpStatus> deleteBus(@RequestBody long id){
-       try{
-           adminBusService.deleteBus(id);
-           return ResponseEntity.noContent().build();
-       }
-       catch (IllegalArgumentException e){
-           return ResponseEntity.badRequest().build();
-       }
+
+       adminBusService.deleteBus(id);
+       return ResponseEntity.noContent().build();
+
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateBus (@PathVariable long id, @RequestBody Bus newBus){
-       try {
-           Bus updateBus = adminBusService.updateBus(id,newBus);
-           return ResponseEntity.ok(updateBus);
 
-       }catch (IllegalArgumentException e){
-           return  ResponseEntity.notFound().build();
-       }catch (RuntimeException e){
-           return ResponseEntity.badRequest().body(e.getMessage());
-       }
+       Bus updateBus = adminBusService.updateBus(id,newBus);
+       return ResponseEntity.ok(updateBus);
+
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateBusCapacity(@PathVariable long id, @RequestBody Map<String, Integer> updates){
-       try {
-           Bus updateBus = adminBusService.updateBusCapacity(id,updates);
-           return ResponseEntity.ok(updateBus);
-       }
-       catch (IllegalArgumentException e){
-           return ResponseEntity.badRequest().body(e.getMessage());
-       }
+
+       Bus updateBus = adminBusService.updateBusCapacity(id,updates);
+       return ResponseEntity.ok(updateBus);
+
     }
 
 }

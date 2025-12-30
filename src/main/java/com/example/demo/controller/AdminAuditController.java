@@ -23,12 +23,9 @@ public class AdminAuditController {
     }
     @GetMapping("user/{userId}")
     public ResponseEntity<?> getUserAuditLog(@PathVariable long userId){
-      try {
-          List<AuditLog> auditLogs = adminAuditService.getUserAuditLog(userId);
-          return ResponseEntity.ok(auditLogs);
-      }
-      catch (IllegalArgumentException e){
-          return ResponseEntity.badRequest().body(e.getMessage());
-      }
+
+        List<AuditLog> auditLogs = adminAuditService.getUserAuditLog(userId);
+        return ResponseEntity.ok(auditLogs);
+
     }
 }

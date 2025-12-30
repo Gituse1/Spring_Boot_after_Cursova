@@ -1,32 +1,108 @@
-//package com.example.service;
-//
-//import com.example.demo.model.Ticket;
-//import com.example.demo.repository.TicketRepository;
-//import com.example.demo.service.AuditService;
-//import com.example.demo.service.TicketService;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//
-//import java.util.Optional;
-//
-//import static jdk.internal.org.objectweb.asm.util.CheckClassAdapter.verify;
-//import static org.mockito.Mockito.when;
-//
-//public class TicketServiceTest {
-//    @Mock
-//    private TicketRepository ticketRepository;
-//    private AuditService auditService;
-//
-//    @InjectMocks
-//    private TicketService ticketService;
-//
-//    @Test
-//    void deleteTicket_WhenUserIsOwner(){
-//        Ticket testTicket = new Ticket();
-//        testTicket.getUser().setName("Ivan");
-//        when(ticketRepository.findTakenByTripIdAndSeats(1L,5)).thenReturn(Optional.of(testTicket));
-//        ticketService.getTakenSeats(1L);
-//        verify(ticketRepository).delete(testTicket);
-//    }
-//}
+package com.example.service;
+
+import com.example.demo.model.ActionType;
+import com.example.demo.model.Ticket;
+import com.example.demo.model.User;
+import com.example.demo.repository.TicketRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.service.AuditService;
+import com.example.demo.service.TicketService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.security.Principal;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class TicketServiceTest {
+
+    @Mock
+    private TicketRepository ticketRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private AuditService auditService;
+
+    @InjectMocks
+    private TicketService ticketService;
+
+    @Test
+    void deleteTicket_ShouldDelete_WhenUserIdsMatch() {
+        // --- ARRANGE (Підготовка) ---
+        long tripId = 1L;
+        int seatNumber = 5;
+        long userId = 100L;
+        String username = "Ivan";
+
+        Principal mockPrincipal = mock(Principal.class);
+        when(mockPrincipal.getName()).thenReturn(username);
+
+        // 2. Створюємо власника (User)
+        User owner = new User();
+        owner.setIdUser(userId);
+        owner.setName(username);
+
+        // 3. Створюємо квиток (Ticket) і прив'язуємо власника
+        Ticket testTicket = new Ticket();
+        testTicket.setIdTicket(50);
+        testTicket.setUser(owner);
+
+        // 4. Навчаємо репозиторії
+        when(ticketRepository.findTakenByTripIdAndSeats(tripId, seatNumber))
+                .thenReturn(testTicket);
+
+        // Репозиторій юзерів повертає власника
+        when(userRepository.findUserByUserName(username))
+                .thenReturn(owner);
+
+        // --- ACT (Дія) ---
+        // Викликаємо правильний метод!
+        ticketService.deleteTicket(tripId, seatNumber, mockPrincipal);
+
+        // --- ASSERT (Перевірка) ---
+        // Перевіряємо, що викликано видалення саме цього квитка
+        verify(ticketRepository).deleteById((long) testTicket.getIdTicket());
+
+        // Перевіряємо, що записався лог успіху (true)
+        verify(auditService).createNewLog(eq(ActionType.DELETE_TICKET), eq(true), any(), eq(mockPrincipal));
+    }
+
+    @Test
+    void deleteTicket_ShouldThrowException_WhenUserIsNotOwner() {
+        // --- ARRANGE ---
+
+        Principal hacker = mock(Principal.class);
+        when(hacker.getName()).thenReturn("Hacker");
+        User hackerUser = new User();
+        hackerUser.setIdUser(999L);
+
+
+        User owner = new User();
+        owner.setIdUser(100L);
+
+        Ticket ticket = new Ticket();
+        ticket.setUser(owner);
+
+        // 3. Навчаємо репозиторії
+        when(ticketRepository.findTakenByTripIdAndSeats(anyLong(), anyInt())).thenReturn(ticket);
+        when(userRepository.findUserByUserName("Hacker")).thenReturn(hackerUser);
+
+        // --- ACT & ASSERT ---
+        // Ми очікуємо, що код "вибухне" помилкою SecurityException
+        assertThrows(SecurityException.class, () -> {
+            ticketService.deleteTicket(1L, 5, hacker);
+        });
+
+        // ГОЛОВНЕ: Перевіряємо, що метод delete НІКОЛИ не викликався
+        verify(ticketRepository, never()).deleteById(any());
+    }
+}

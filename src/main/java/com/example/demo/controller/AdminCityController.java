@@ -22,14 +22,9 @@ public class AdminCityController {
     //  Створити нове місто (POST)
     @PostMapping
     public ResponseEntity<City> createCity(@RequestBody City city) {
-        try{
-            City newCity = adminCityService.createCity(city.getName());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(newCity);
-        }
-        catch (IllegalArgumentException e){
-            throw new RuntimeException("Таке місто вже існує");
-        }
+        City newCity = adminCityService.createCity(city.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(newCity);
 
     }
 
@@ -43,38 +38,26 @@ public class AdminCityController {
     @DeleteMapping
     public ResponseEntity<HttpStatus>deleteCity(@PathVariable Long id){
 
-       try {
-           adminCityService.deleteCity(id);
-           return ResponseEntity.ok().build();
-       }
-       catch (IllegalArgumentException e){
-           throw  new RuntimeException("Такого місця не існує");
-       }
+        adminCityService.deleteCity(id);
+        return ResponseEntity.ok().build();
 
     }
 
     //  Оновити місто (PUT)
     @PutMapping("/{id}")
     public ResponseEntity<City> updateCity(@PathVariable Long id, @RequestBody City cityDetails) {
-        try {
-            City updateCity = adminCityService.updateCity(id, cityDetails);
-            return ResponseEntity.ok(updateCity);
-        }
-        catch (IllegalArgumentException e){
-            return ResponseEntity.notFound().build();
-        }
+
+        City updateCity = adminCityService.updateCity(id, cityDetails);
+        return ResponseEntity.ok(updateCity);
+
     }
 
     @PatchMapping ("/{id}")
     public ResponseEntity<?> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates) {
-        try {
-            City updateCity = adminCityService.updateCityName(id, updates);
-            return ResponseEntity.ok(updateCity);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (NullPointerException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        City updateCity = adminCityService.updateCityName(id, updates);
+        return ResponseEntity.ok(updateCity);
+
     }
 
 

@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "app_users") // 1. Змінили назву, щоб не конфліктувати з SQL
@@ -14,17 +18,34 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_user")
-    private Long idUser; // 2. Краще використовувати Long для ID (int може переповнитися)
+    private Long id; // Просто id, без User. Контекст і так зрозумілий
 
     @Column(nullable = false)
-    private String name; // Ім'я (наприклад "Ivan")
+    private String name;
 
     @Column(unique = true, nullable = false)
-    private String email; // 3. Це буде наш логін (унікальний)
+    private String email;
 
     @Column(nullable = false)
-    private String password; // Пароль (буде зашифрований)
+    private String password;
 
-    private String role = "ROLE_USER"; // 4. Роль за замовчуванням
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 }

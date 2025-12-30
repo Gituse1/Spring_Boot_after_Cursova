@@ -25,16 +25,11 @@ public class AdminUserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable long id){
-        try{
-            adminUserService.deleteUser(id);
-            return ResponseEntity.noContent().build();
 
-        }catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        catch (RuntimeException e) {
-            return ResponseEntity.notFound().build(); // 404
-        }
+        adminUserService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+
+
     }
 
         @PutMapping("/{id}")

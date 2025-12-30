@@ -55,13 +55,9 @@ public class TripService  {
         return tripRepository.save(trip);
     }
 
-
-
     public List<Trip> getAllTrips() {
         return tripRepository.findAll();
     }
-
-
 
     public List<Trip> searchTrips(Long fromCityId, Long toCityId, String dateStr) {
         // Якщо дата прийшла, перетворюємо її. Якщо ні — буде null.

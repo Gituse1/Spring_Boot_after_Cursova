@@ -26,7 +26,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(myUser.getEmail())      // В якості логіна використовуємо email
                 .password(myUser.getPassword())   // Пароль з бази (у нас там {noop}1234)
-                .roles(myUser.getRole().replace("ROLE_", "")) // Spring іноді хоче роль без префікса, але поки передаємо так
                 .build();
     }
 }

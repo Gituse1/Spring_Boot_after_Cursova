@@ -30,23 +30,15 @@ public class AuthController {
     @GetMapping("/user")
     public ResponseEntity<User> getCurrentUserDetails(Authentication authentication, Principal principal) {
 
-        try {
-            User newUser = authService.getCurrentUserDetails(authentication, principal);
-            return ResponseEntity.ok(newUser);
-        }
-        catch (IllegalArgumentException e){
-            throw new RuntimeException("Автентифікованого користувача не знайдено.");
-        }
+        User newUser = authService.getCurrentUserDetails(authentication, principal);
+        return ResponseEntity.ok(newUser);
+
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request,Principal principal) {
-        try{
-            authService.registerUser(request,principal);
-            return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
-        }
-        catch ( IllegalArgumentException e){
-            return ResponseEntity.badRequest().body("Цей email вже зайнятий!");
-        }
+        authService.registerUser(request,principal);
+        return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
+
     }
 }

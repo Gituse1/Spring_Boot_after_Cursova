@@ -30,11 +30,6 @@ public class User {
     private String password;
 
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
-
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 

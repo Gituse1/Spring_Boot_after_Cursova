@@ -1,13 +1,13 @@
 package com.example.service;
 
 import com.example.dto.RegisterRequest;
+import com.example.mapper.UserMapper;
 import com.example.model.ActionType;
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
 import java.security.Principal;
 import java.util.Optional;
 
@@ -16,26 +16,19 @@ import java.util.Optional;
 public class AuthService {
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final UserMapper userMapper;
 
+    public void registerUser( RegisterRequest request) {
 
-    public void registerUser( RegisterRequest request, Principal principal) {
-
-        // 1. Перевірка: чи існує email
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            auditService.createNewLog(ActionType.LOGIN, false, "User ID: None", principal);
-
-            throw new IllegalArgumentException();
+        if (userRepository.existsByEmail(request.getEmail())) {
+            auditService.createNewLog(ActionType.REGISTRATION, false, "Email busy: " + request.getEmail(), null);
+            throw new IllegalArgumentException("Цей email вже зайнятий!");
         }
 
-        User newUser = new User();
-        newUser.setName(request.getName());
-        newUser.setEmail(request.getEmail());
-
-        newUser.setPassword(request.getPassword());
+        User newUser = userMapper.toEntity(request);
 
         userRepository.save(newUser);
-        auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + newUser.getId(), principal);
-
+        auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + newUser.getId(), null);
     }
 
     public User getCurrentUserDetails(Authentication authentication, Principal principal) {
@@ -46,8 +39,8 @@ public class AuthService {
         if (userOptional.isEmpty()) {
 
             auditService.createNewLog(ActionType.LOGIN, false, "Користувача не знайдено в базі (хоча токен є)", principal);
-
             throw new IllegalArgumentException("Користувача на знайдено");
+
         }
         User user = userOptional.get();
 

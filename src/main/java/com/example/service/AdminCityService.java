@@ -1,7 +1,7 @@
 package com.example.service;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.model.*;
+import com.example.repository.*;
 import com.example.model.City;
 import com.example.repository.CityRepository;
 import lombok.RequiredArgsConstructor;

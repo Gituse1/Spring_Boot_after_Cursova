@@ -1,7 +1,7 @@
 package com.example.service;
 
 import com.example.dto.TicketRequest;
-import com.example.demo.model.*;
+import com.example.model.*;
 import com.example.model.*;
 import com.example.repository.RoutePointRepository;
 import com.example.repository.TicketRepository;

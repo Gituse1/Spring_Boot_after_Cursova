@@ -32,8 +32,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request,Principal principal) {
-        authService.registerUser(request,principal);
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
+        authService.registerUser(request);
         return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
 
     }

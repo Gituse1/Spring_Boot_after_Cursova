@@ -1,12 +1,10 @@
 package com.example.service;
 
-import com.example.demo.model.ActionType;
-import com.example.demo.model.Ticket;
-import com.example.demo.model.User;
-import com.example.demo.repository.TicketRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.service.AuditService;
-import com.example.demo.service.TicketService;
+import com.example.model.ActionType;
+import com.example.model.Ticket;
+import com.example.model.User;
+import com.example.repository.TicketRepository;
+import com.example.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

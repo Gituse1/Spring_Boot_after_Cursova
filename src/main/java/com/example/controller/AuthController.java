@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.dto.Request.LoginRequest;
 import com.example.dto.Request.RegisterRequest; // Імпорт нового DTO
 import com.example.dto.Response.UserResponse;
 import com.example.service.AuthService;
@@ -18,15 +19,16 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> checkLogin(Authentication authentication) {
+    public ResponseEntity<?> checkLogin(LoginRequest request) {
         // Метод для швидкої перевірки сесії (використовується на фронтенді для входу)
-        return ResponseEntity.ok("Login Success for user: " + authentication.getName());
+        authService.loginUser(request);
+        return ResponseEntity.ok("Login Success for user: " + request.getEmail());
     }
 
     @GetMapping("/user")
-    public ResponseEntity<UserResponse> getCurrentUserDetails(Authentication authentication, Principal principal) {
+    public ResponseEntity<UserResponse> getCurrentUserDetails(Authentication authentication) {
 
-        UserResponse newUser = authService.getCurrentUserDetails(authentication, principal);
+        UserResponse newUser = authService.getCurrentUserDetails(authentication);
         return ResponseEntity.ok(newUser);
 
     }

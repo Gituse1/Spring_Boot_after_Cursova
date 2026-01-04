@@ -84,8 +84,8 @@ public class TicketService  {
             auditService.createNewLog(
                     ActionType.BOOK_TICKET,
                     true,
-                    "Ticket ID: " + savedTicket.getIdTicket() + ", User: " + principal.getName(),
-                    principal
+                    "Ticket ID: " + savedTicket.getIdTicket() + ", User: " ,
+                    principal.getName()
             );
 
             return savedTicket;
@@ -97,7 +97,7 @@ public class TicketService  {
                     ActionType.BOOK_TICKET,
                     false,
                     "Ticket ID: None, Error: " + e.getMessage(), // Корисно додати текст помилки
-                    principal
+                    principal.getName()
             );
 
             // Обов'язково прокидаємо помилку далі, щоб контролер знав про збій
@@ -123,34 +123,34 @@ public class TicketService  {
     public void deleteTicket( long tripId,  int seatNumber, Principal principal){
         if(tripId==0||seatNumber==0){
 
-            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId + ", Seat: " + seatNumber,principal);
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId + ", Seat: " + seatNumber,principal.getName());
             throw new  IllegalArgumentException("невірні дані");
         }
         Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
         User user= userRepository.findUserByUserName(principal.getName());
         if (ticket == null) {
-            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket not found", principal);
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket not found", principal.getName());
             throw new RuntimeException("Квиток не знайдено");
         }
 
         if (!ticket.getUser().getId().equals(user.getId())) {
-            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId, principal);
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId, principal.getName());
             throw new SecurityException("Це не ваш квиток!");
         }
 
         ticketRepository.deleteById((long) ticket.getIdTicket());
-        auditService.createNewLog(ActionType.DELETE_TICKET, true, "Trip ID: " + tripId, principal);
+        auditService.createNewLog(ActionType.DELETE_TICKET, true, "Trip ID: " + tripId, principal.getName());
     }
 
 
     public void deleteTicket(@PathVariable long id,Principal principal){
         if(!ticketRepository.existsById(id)){
 
-            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket ID: " + id + ", User: Admin ", principal);
+            auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket ID: " + id + ", User: Admin ", principal.getName());
             throw  new IllegalArgumentException("Невірні данні id"+ id);
         }
         ticketRepository.deleteById(id);
-        auditService.createNewLog(ActionType.DELETE_TICKET, true, "Ticket ID: " + id + ", User: Admin ", principal);
+        auditService.createNewLog(ActionType.DELETE_TICKET, true, "Ticket ID: " + id + ", User: Admin ", principal.getName());
 
     }
 }

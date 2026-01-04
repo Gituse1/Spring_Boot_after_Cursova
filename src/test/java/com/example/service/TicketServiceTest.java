@@ -46,7 +46,7 @@ public class TicketServiceTest {
 
         // 2. Створюємо власника (User)
         User owner = new User();
-        owner.setIdUser(userId);
+        owner.setId(userId);
         owner.setName(username);
 
         // 3. Створюємо квиток (Ticket) і прив'язуємо власника
@@ -71,7 +71,7 @@ public class TicketServiceTest {
         verify(ticketRepository).deleteById((long) testTicket.getIdTicket());
 
         // Перевіряємо, що записався лог успіху (true)
-        verify(auditService).createNewLog(eq(ActionType.DELETE_TICKET), eq(true), any(), eq(mockPrincipal));
+        verify(auditService).createNewLog(eq(ActionType.DELETE_TICKET), eq(true), any(), eq(mockPrincipal).getName());
     }
 
     @Test
@@ -81,11 +81,11 @@ public class TicketServiceTest {
         Principal hacker = mock(Principal.class);
         when(hacker.getName()).thenReturn("Hacker");
         User hackerUser = new User();
-        hackerUser.setIdUser(999L);
+        hackerUser.setId(999L);
 
 
         User owner = new User();
-        owner.setIdUser(100L);
+        owner.setId(100L);
 
         Ticket ticket = new Ticket();
         ticket.setUser(owner);

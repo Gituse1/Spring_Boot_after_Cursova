@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.naming.AuthenticationException;
+
 @RestControllerAdvice // 1.
 public class GlobalExceptionHandler {
 
@@ -30,6 +32,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<String> handleForbidden(SecurityException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<String> handleForbidden(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 

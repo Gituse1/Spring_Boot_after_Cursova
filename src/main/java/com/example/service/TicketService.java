@@ -126,7 +126,7 @@ public class TicketService  {
             throw new  IllegalArgumentException("невірні дані");
         }
         Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
-        User user= userRepository.findUserByUserName(principal.getName());
+        User user= userRepository.findUserByEmail(principal.getName());
         if (ticket == null) {
             auditService.createNewLog(ActionType.DELETE_TICKET, false, "Ticket not found", principal.getName());
             throw new RuntimeException("Квиток не знайдено");

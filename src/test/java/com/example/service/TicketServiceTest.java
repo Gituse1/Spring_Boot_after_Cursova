@@ -39,7 +39,7 @@ public class TicketServiceTest {
         long tripId = 1L;
         int seatNumber = 5;
         long userId = 100L;
-        String username = "Ivan";
+        String username = "Ivan.@gmail.com";
 
         Principal mockPrincipal = mock(Principal.class);
         when(mockPrincipal.getName()).thenReturn(username);
@@ -59,7 +59,7 @@ public class TicketServiceTest {
                 .thenReturn(testTicket);
 
         // Репозиторій юзерів повертає власника
-        when(userRepository.findUserByUserName(username))
+        when(userRepository.findUserByEmail(username))
                 .thenReturn(owner);
 
         // --- ACT (Дія) ---
@@ -92,7 +92,7 @@ public class TicketServiceTest {
 
         // 3. Навчаємо репозиторії
         when(ticketRepository.findTakenByTripIdAndSeats(anyLong(), anyInt())).thenReturn(ticket);
-        when(userRepository.findUserByUserName("Hacker")).thenReturn(hackerUser);
+        when(userRepository.findUserByEmail("Hacker")).thenReturn(hackerUser);
 
         // --- ACT & ASSERT ---
         // Ми очікуємо, що код "вибухне" помилкою SecurityException

@@ -8,6 +8,8 @@ import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,11 @@ public class AuditService {
             return;
         }
         AuditLog auditLog = new AuditLog();
-        User user= userRepository.findUserByUserName(email);
+        Optional<User> newUser= userRepository.findByEmail(email);
+        if(newUser.isEmpty()){
+            throw new NullPointerException();
+        }
+        User user = newUser.get();
         auditLog.setUser(user);
         auditLog.setAction(action);
         auditLog.setStatus(status);

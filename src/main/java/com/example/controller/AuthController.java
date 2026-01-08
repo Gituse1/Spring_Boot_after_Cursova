@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,11 +23,15 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @GetMapping("/me")
-    public ResponseEntity<?> checkLogin(LoginRequest request) {
-        // Метод для швидкої перевірки сесії (використовується на фронтенді для входу)
-        authService.loginUser(request);
-        return ResponseEntity.ok("Login Success for user: " + request.getEmail());
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        System.out.println("Точка 0");
+        String token = authService.loginUser(request);
+        // Повертаємо JSON
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user")
@@ -38,10 +44,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
-        authService.registerUser(request);
-        return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
+       authService.registerUser(request);
+       return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
 
     }
+
+
 
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(

@@ -32,7 +32,7 @@ public class AuthService {
     public void registerUser( RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            auditService.createNewLog(ActionType.REGISTRATION, false, "Email busy: " + request.getEmail(), null);
+           // auditService.createNewLog(ActionType.REGISTRATION, false, "Email busy: " + request.getEmail(), null);
             throw new IllegalArgumentException("Цей email вже зайнятий!");
         }
 
@@ -41,7 +41,7 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         newUser.setPassword(encodedPassword);
         userRepository.save(newUser);
-        auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + newUser.getId(), null);
+        //auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + request.getEmail(), null);
     }
 
     public UserResponse getCurrentUserDetails(Authentication authentication) {
@@ -61,30 +61,39 @@ public class AuthService {
         return user;
     }
 
-    public void loginUser(LoginRequest request){
-        String username = request.getEmail();
+
+    public String loginUser(LoginRequest request) {
+        String userEmail = request.getEmail();
+        System.out.println("Точка 1: Початок");
 
         try {
-
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, request.getPassword())
+                    new UsernamePasswordAuthenticationToken(userEmail, request.getPassword())
             );
         } catch (AuthenticationException e) {
-            // Якщо пароль не підійшов або юзера немає
-            auditService.createNewLog(ActionType.LOGIN, false, "Невірний логін або пароль", username);
+            auditService.createNewLog(ActionType.LOGIN, false, "Невірний логін або пароль", userEmail);
             throw new IllegalArgumentException("Невірні дані для входу");
         }
 
-        // 2. ЯКЩО МИ ТУТ — ПАРОЛЬ ВІРНИЙ. ОТРИМУЄМО ЮЗЕРА
-        var user = userRepository.findByEmail(username)
+        System.out.println("Точка 2: Аутентифікація успішна");
+
+        var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено"));
-        // Цей throw малоймовірний, бо authenticate пройшов, але для Java треба
+
+        System.out.println("Точка 3: Юзера знайдено");
 
         user.setActive(true);
         userRepository.save(user);
 
+        System.out.println("Точка 4: Юзера оновлено");
+
         String jwtToken = jwtService.generateToken(user);
-        auditService.createNewLog(ActionType.LOGIN,true,"Вхід в систему",request.getEmail());
+        auditService.createNewLog(ActionType.LOGIN, true, "Вхід в систему", userEmail);
+
+        System.out.println("Точка 5: Токен згенеровано");
+
+        // ВАЖЛИВО: Повертаємо токен
+        return jwtToken;
     }
 
     public void updateUserPassword(ChangePasswordRequest request){

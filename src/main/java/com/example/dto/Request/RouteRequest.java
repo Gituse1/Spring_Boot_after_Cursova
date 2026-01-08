@@ -9,6 +9,5 @@ public class RouteRequest {
     private String routeName;
     private LocalTime startTime;
     private LocalTime endTime;
-
     private List<RoutePointRequest> points;
 }

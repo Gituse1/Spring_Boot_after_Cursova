@@ -18,13 +18,13 @@ public class AuditService {
     private final UserRepository userRepository;
 
 
-    public void createNewLog(ActionType action, boolean status,String details,String name){
+    public void createNewLog(ActionType action, boolean status,String details,String email){
         if(action==null){
             System.out.println("Помилка логування: Юзера не знайдено");
             return;
         }
         AuditLog auditLog = new AuditLog();
-        User user= userRepository.findUserByUserName(name);
+        User user= userRepository.findUserByUserName(email);
         auditLog.setUser(user);
         auditLog.setAction(action);
         auditLog.setStatus(status);

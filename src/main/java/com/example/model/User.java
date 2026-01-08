@@ -1,6 +1,8 @@
 package com.example.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -24,6 +26,8 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false)
+    @NotNull(message = "Ім'я не може бути пустим")
+    @Size(min = 2, max = 50, message = "Ім'я має бути від 2 до 50 символів")
     private String name;
 
     @Column(unique = true, nullable = false)
@@ -34,6 +38,9 @@ public class User implements UserDetails {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserProfile userProfile;
 
 
     @Column(nullable = false)

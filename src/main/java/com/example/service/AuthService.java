@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.dto.Request.ChangePasswordRequest;
 import com.example.dto.Request.LoginRequest;
 import com.example.dto.Request.RegisterRequest;
 import com.example.mapper.UserMapper;
@@ -83,7 +84,21 @@ public class AuthService {
         userRepository.save(user);
 
         String jwtToken = jwtService.generateToken(user);
-
         auditService.createNewLog(ActionType.LOGIN,true,"Вхід в систему",request.getEmail());
+    }
+
+    public void updateUserPassword(ChangePasswordRequest request){
+        Optional<User> userOptional =userRepository.findByEmail(request.getEmail());
+
+        if(userOptional.isEmpty()){
+            auditService.createNewLog(ActionType.UPDATE_USER_DATA,false,"Корисувача не знайдено",request.getEmail());
+            throw  new UsernameNotFoundException("Користувача не знайдено");
+        }
+        User user = userOptional.get();
+        String newPassword=request.getNewPassword();
+        user.setPassword(newPassword);
+        userRepository.save(user);
+        auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,"Пароль користувача було змінено",request.getEmail());
+
     }
 }

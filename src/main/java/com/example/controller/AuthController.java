@@ -1,9 +1,12 @@
 package com.example.controller;
 
+import com.example.dto.Request.ChangePasswordRequest;
 import com.example.dto.Request.LoginRequest;
 import com.example.dto.Request.RegisterRequest; // Імпорт нового DTO
 import com.example.dto.Response.UserResponse;
 import com.example.service.AuthService;
+import com.example.service.UserProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -38,6 +41,16 @@ public class AuthController {
         authService.registerUser(request);
         return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
 
+    }
 
+    @PutMapping("/password")
+    public ResponseEntity<Void> changePassword(
+            Authentication authentication,
+            @RequestBody @Valid ChangePasswordRequest request
+    ) {
+        // authentication.getName() поверне email із токена
+        authService.updateUserPassword(request);
+
+        return ResponseEntity.ok().build();
     }
 }

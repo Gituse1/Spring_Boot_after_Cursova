@@ -119,7 +119,6 @@ public class TicketService  {
         return ticketRepository.findByUser(user);
     }
 
-
     public void deleteTicket( long tripId,  int seatNumber, Principal principal){
         if(tripId==0||seatNumber==0){
 

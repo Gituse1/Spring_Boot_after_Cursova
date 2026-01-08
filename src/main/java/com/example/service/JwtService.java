@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Service
 public class JwtService {
 
     // ВАЖЛИВО: Цей ключ має бути дуже довгим (мінімум 256 біт).

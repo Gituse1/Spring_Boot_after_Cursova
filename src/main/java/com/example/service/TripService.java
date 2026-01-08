@@ -11,6 +11,7 @@ import com.example.repository.TripRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class TripService  {
     private final RouteRepository routeRepository;
     private final BusRepository busRepository;
 
-
+    @Transactional
     public Trip createTrip(TripRequest request) {
 
         LocalDateTime startRange = request.getDepartureTime().minusHours(1);
@@ -59,6 +60,7 @@ public class TripService  {
         return tripRepository.findAll();
     }
 
+    @Transactional
     public List<Trip> searchTrips(Long fromCityId, Long toCityId, String dateStr) {
         // Якщо дата прийшла, перетворюємо її. Якщо ні — буде null.
         LocalDate searchDate = (dateStr != null && !dateStr.isEmpty()) ? LocalDate.parse(dateStr) : null;

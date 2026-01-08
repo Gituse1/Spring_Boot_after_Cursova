@@ -3,7 +3,9 @@ package com.example.mapper;
 import com.example.dto.Request.RegisterRequest;
 import com.example.model.User;
 import com.example.dto.Response.UserResponse;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
     public User toEntity(RegisterRequest request){
         User newUser = new User();

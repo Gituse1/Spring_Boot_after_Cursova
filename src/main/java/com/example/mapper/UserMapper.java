@@ -11,7 +11,7 @@ public class UserMapper {
         User newUser = new User();
         newUser.setName(request.getName());
         newUser.setEmail(request.getEmail());
-    //    newUser.setPassword(request.getPassword());
+        newUser.setPassword(request.getPassword());
         newUser.setRole("User");
         return newUser;
     }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.naming.AuthenticationException;
+import java.time.format.DateTimeParseException;
 
 @RestControllerAdvice // 1.
 public class GlobalExceptionHandler {
@@ -37,6 +38,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleForbidden(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<String> handleForbidden(DateTimeParseException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
 }

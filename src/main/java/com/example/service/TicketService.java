@@ -40,16 +40,28 @@ public class TicketService  {
             }
 
             Trip trip = tripRepository.findById(request.getTripId())
-                    .orElseThrow(() -> new EntityNotFoundException("Рейс не знайдено з ID: " + request.getTripId()));
+                    .orElseThrow(() -> {
+                        auditService.createNewLog(ActionType.BOOK_TICKET,false);
+                        return new EntityNotFoundException("Рейс не знайдено з ID: " + request.getTripId());
+                    });
 
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("Користувача з email " + email + " не знайдено"));
+                    .orElseThrow(() -> {
+                        auditService.createNewLog(ActionType.CREATE_TRIP,false);
+                        return new EntityNotFoundException("Користувача з email " + email + " не знайдено");
+                    });
 
             RoutePoint startPoint = routePointRepository.findById(request.getStartPointId())
-                    .orElseThrow(() -> new EntityNotFoundException("Точку відправлення не знайдено"));
+                    .orElseThrow(() -> {
+                        auditService.createNewLog(ActionType.CREATE_TRIP,false);
+                        return new EntityNotFoundException("Точку відправлення не знайдено");
+                    });
 
             RoutePoint endPoint = routePointRepository.findById(request.getEndPointId())
-                    .orElseThrow(() -> new EntityNotFoundException("Точку прибуття не знайдено"));
+                    .orElseThrow(() -> {
+                        auditService.createNewLog(ActionType.CREATE_TRIP,false);
+                        return new EntityNotFoundException("Точку прибуття не знайдено");
+                    });
 
             Long tripRouteId = trip.getRoute().getIdRoute();
 

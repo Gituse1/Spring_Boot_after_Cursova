@@ -27,7 +27,7 @@ public class UserProfileService {
         Optional<User> userOptional =userRepository.findByEmail(email);
 
         if(userOptional.isEmpty()){
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA,false,"Корисувача не знайдено",email);
+            auditService.createNewLog(ActionType.UPDATE_USER_DATA,false,email);
             throw  new UsernameNotFoundException("User not found");
         }
         User user = userOptional.get();
@@ -55,28 +55,28 @@ public class UserProfileService {
     private   void updateProfilePhoneNumber(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
             profile.setPhoneNumber(request.getPhoneNumber());
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,"Номер користувача змінено",email);
+            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,email);
         }
     }
 
     private   void updateProfileAddress(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getAddress() != null && !request.getAddress().isBlank()) {
             profile.setAddress(request.getAddress());
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,"Адресу користувача змінено",email);
+            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,email);
         }
     }
 
     private   void updateProfileCity(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getCity() != null && !request.getCity().isBlank()) {
             profile.setCity(request.getCity());
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,"Місто користувача змінено",email);
+            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,email);
         }
     }
 
     private   void updateProfileBio(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getBio() != null) {
             profile.setBio(request.getBio());
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,"Особистий опис користувача змінено",email);
+            auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,email);
         }
     }
 }

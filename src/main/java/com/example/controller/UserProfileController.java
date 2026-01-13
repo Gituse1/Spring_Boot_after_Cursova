@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import com.example.dto.Request.UpdateProfileRequest;
-import com.example.repository.UserProfileRepository;
 import com.example.service.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

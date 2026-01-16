@@ -14,7 +14,7 @@ public class Bus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_bus")
-    private int idBus;
+    private Long idBus;
 
     @Column(name = "total_seats")
     private int totalSeats;

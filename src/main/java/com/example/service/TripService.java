@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +29,8 @@ public class TripService  {
     @Transactional
     public Trip createTrip(TripRequest request) {
 
-        LocalDateTime startRange = request.getDepartureTime().minusHours(1);
-        LocalDateTime endRange = request.getDepartureTime().plusHours(1);
+        LocalTime startRange = LocalTime.from(request.getDepartureTime().minusHours(1));
+        LocalTime endRange = LocalTime.from(request.getDepartureTime().plusHours(1));
 
         // 1. ВАЛІДАЦІЯ: Передаємо діапазон у репозиторій
         boolean isBusBusy = tripRepository.checkBusIsBusy(
@@ -57,7 +58,7 @@ public class TripService  {
                     return new EntityNotFoundException("Bus not found with id: " + request.getBusId());
                 });
 
-        auditService.createNewLog(ActionType.FIND_BUS, true, "Автобус знайдено", null);
+        auditService.createNewLog(ActionType.FIND_BUS, true);
 
         Trip trip = new Trip();
         trip.setRoute(route);
@@ -75,7 +76,7 @@ public class TripService  {
     public List<Trip> searchTrips(Long fromCityId, Long toCityId, String dateStr) {
         // Якщо дата прийшла, перетворюємо її. Якщо ні — буде null.
         if (dateStr == null || dateStr.isEmpty()){
-            throw new RuntimeException("Не відповідна дата");
+            throw new IllegalArgumentException("Не відповідна дата");
         }
 
         try {
@@ -83,48 +84,11 @@ public class TripService  {
             LocalDate.parse(dateStr);
         } catch (DateTimeParseException e) {
 
-            // Якщо парсинг впав — значить формат неправильний або дати не існує
             throw new IllegalArgumentException("Невірний формат дати: '" + dateStr + "'. Очікується формат РРРР-ММ-ДД (наприклад 2025-01-20).");
         }
         LocalDate searchDate = LocalDate.parse(dateStr);
 
-        return tripRepository.findAll().stream()
-                .filter(trip -> {
-                    // 1. Фільтр по ДАТІ (якщо вона обрана)
-                    if (!trip.getDepartureTime().toLocalDate().equals(searchDate)) {
-                        return false; // Дата не співпала
-                    }
+        return tripRepository.findTripsByRouteAndDate(fromCityId,toCityId,LocalDate.parse(dateStr));
 
-                    // 2. Фільтр по МАРШРУТУ
-                    // Якщо міста не вибрані — вважаємо, що вони "знайдені"
-                    boolean fromFound = (fromCityId == null);
-                    boolean toFound = (toCityId == null);
-
-                    int fromIndex = -1;
-                    int toIndex = -1;
-
-                    // Пробігаємось по точках маршруту
-                    for (RoutePoint point : trip.getRoute().getRoutePoints()) {
-                        if (fromCityId != null && point.getCity().getIdCity() == fromCityId) {
-                            fromIndex = point.getOrderIndex();
-                            fromFound = true;
-                        }
-                        if (toCityId != null && point.getCity().getIdCity() == toCityId) {
-                            toIndex = point.getOrderIndex();
-                            toFound = true;
-                        }
-                    }
-
-                    // Якщо якесь із вибраних міст не знайдено — рейс не підходить
-                    if (!fromFound || !toFound) return false;
-
-                    // Якщо вибрані ОБИДВА міста — перевіряємо порядок (щоб не їхати назад)
-                    if (fromCityId != null && toCityId != null) {
-                        return fromIndex < toIndex;
-                    }
-
-                    return true;
-                })
-                .toList();
     }
 }

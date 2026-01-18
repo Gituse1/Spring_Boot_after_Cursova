@@ -5,15 +5,18 @@ import com.example.model.Ticket;
 import com.example.model.User;
 import com.example.repository.TicketRepository;
 import com.example.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.Principal;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -33,36 +36,37 @@ public class TicketServiceTest {
     @InjectMocks
     private TicketService ticketService;
 
+    private String userName;
+    private  Principal mockPrincipal;
+
+    @BeforeEach
+    public void before(){
+        userName = "Ivan.@gmail.com";
+
+        mockPrincipal = mock(Principal.class);
+        when(mockPrincipal.getName()).thenReturn(userName);
+        lenient().doNothing().when(auditService).createNewLog(any(), anyBoolean());
+        lenient().doNothing().when(auditService).createNewLog(any(),anyBoolean(),any(),anyString());
+    }
+
     @Test
     void deleteTicket_ShouldDelete_WhenUserIdsMatch() {
         // --- ARRANGE (Підготовка) ---
         long tripId = 1L;
         int seatNumber = 5;
-        long userId = 100L;
-        String username = "Ivan.@gmail.com";
 
-        Principal mockPrincipal = mock(Principal.class);
-        when(mockPrincipal.getName()).thenReturn(username);
+        User owner = createTestUser(100L,userName);
 
-        // 2. Створюємо власника (User)
-        User owner = new User();
-        owner.setId(userId);
-        owner.setName(username);
-
-        // 3. Створюємо квиток (Ticket) і прив'язуємо власника
-        Ticket testTicket = new Ticket();
-        testTicket.setIdTicket(50L);
-        testTicket.setUser(owner);
+        Ticket testTicket = createTestTicket(50L,owner);
 
         // 4. Навчаємо репозиторії
-        when(ticketRepository.findTakenByTripIdAndSeats(tripId, seatNumber))
+        lenient().when(ticketRepository.findTakenByTripIdAndSeats(tripId, seatNumber))
                 .thenReturn(testTicket);
 
         // Репозиторій юзерів повертає власника
-        when(userRepository.findUserByEmail(username))
+        lenient().when(userRepository.findUserByEmail(userName))
                 .thenReturn(owner);
 
-        doNothing().when(auditService).createNewLog(any(), anyBoolean());
 
         // --- ACT (Дія) ---
         // Викликаємо правильний метод!
@@ -72,41 +76,56 @@ public class TicketServiceTest {
         // Перевіряємо, що викликано видалення саме цього квитка
         verify(ticketRepository).deleteById(testTicket.getIdTicket());
 
-
-       // Перевіряємо, що записався лог успіху (true)
-//        verify(auditService).createNewLog(eq(ActionType.DELETE_TICKET), eq(true), any(), eq(mockPrincipal).getName());
-    }
+       }
 
     @Test
     void deleteTicket_ShouldThrowException_WhenUserIsNotOwner() {
-        // --- ARRANGE ---
+        String userEmail = "hacker@example.com";
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn(userEmail);
 
-        Principal hacker = mock(Principal.class);
-        when(hacker.getName()).thenReturn("User");
-        User hackerUser = new User();
-        hackerUser.setId(999L);
+        User currentLoggedUser = new User();
+        currentLoggedUser.setId(999L);
 
-
-        User owner = new User();
-        owner.setId(100L);
+        User realOwner = new User();
+        realOwner.setId(100L);
 
         Ticket ticket = new Ticket();
-        ticket.setUser(owner);
+        ticket.setUser(realOwner);
 
-        // 3. Навчаємо репозиторії
-        when(ticketRepository.findTakenByTripIdAndSeats(anyLong(), anyInt())).thenReturn(ticket);
+        when(ticketRepository.findTakenByTripIdAndSeats(1L, 5)).thenReturn(ticket);
+        when(userRepository.findUserByEmail(userEmail)).thenReturn(currentLoggedUser);
 
-        when(userRepository.findUserByEmail("Hacker")).thenReturn(hackerUser);
-
-        doNothing().when(auditService).createNewLog(any(), anyBoolean());
-
-        // --- ACT & ASSERT ---
-        // Ми очікуємо, що код "вибухне" помилкою SecurityException
         assertThrows(SecurityException.class, () -> {
-            ticketService.deleteTicket(1L, 5, hacker);
+            ticketService.deleteTicket(1L, 5, principal);
         });
 
-        // ГОЛОВНЕ: Перевіряємо, що метод delete НІКОЛИ не викликався
         verify(ticketRepository, never()).deleteById(any());
+    }
+
+//    @ParameterizedTest
+//    @CsvSource({
+//            "1,2",
+//            "-2,2",
+//            "0,0",
+//            "1,-2"
+//    })
+//    void buyTicket_ShouldBuy_WhenUserIdsMatch(long idTrip,int seatNumber){
+//
+//        assertTrue(ticketRepository.checkSeatIsTaken(idTrip,seatNumber));
+//    }
+
+    private User createTestUser(long idUser,String nameUser){
+        User user = new User();
+        user.setId(idUser);
+        user.setName(nameUser);
+        return user;
+    }
+
+    private Ticket createTestTicket(long idTicket,User user){
+        Ticket ticket= new Ticket();
+        ticket.setIdTicket(idTicket);
+        ticket.setUser(user);
+        return ticket;
     }
 }

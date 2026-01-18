@@ -7,6 +7,7 @@ import com.example.model.Trip;
 import com.example.repository.BusRepository;
 import com.example.repository.RouteRepository;
 import com.example.repository.TripRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,6 +48,13 @@ class TripServiceTest {
     @InjectMocks
     private  TripService tripService;
 
+
+    @BeforeEach
+    public void before(){
+        lenient().doNothing().when(auditService).createNewLog(any(), anyBoolean());
+        lenient().doNothing().when(auditService).createNewLog(any(),anyBoolean(),any(),anyString());
+    }
+
     @Test
     public void createTripTest(){
          Long testRouteId=2L;
@@ -65,7 +73,6 @@ class TripServiceTest {
 
          when(tripRepository.checkBusIsBusy(eq(testBusId), any(), any())).thenReturn(false);
 
-        doNothing().when(auditService).createNewLog(any(), anyBoolean());
 
 
         tripService.createTrip(tripRequest);
@@ -106,7 +113,6 @@ class TripServiceTest {
                 Arguments.of(trip2, false)
         );
     }
-
 
 
     @Test

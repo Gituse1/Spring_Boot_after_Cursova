@@ -103,7 +103,7 @@ class TripServiceTest {
         }
     }
 
-    // Метод-джерело даних
+
     static Stream<Arguments> provideTripsForTest() {
         TripRequest trip1 = createTestTripRequest(1L,-5L,LocalDateTime.of(2020,2,1,4,2));
         TripRequest trip2 = createTestTripRequest(-1L, 2L ,LocalDateTime.of(2021,2,1,4,2));

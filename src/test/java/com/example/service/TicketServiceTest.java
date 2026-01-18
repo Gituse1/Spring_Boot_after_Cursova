@@ -1,20 +1,24 @@
 package com.example.service;
 
-import com.example.model.ActionType;
-import com.example.model.Ticket;
-import com.example.model.User;
+import com.example.dto.Request.TicketRequest;
+import com.example.model.*;
+import com.example.repository.RoutePointRepository;
 import com.example.repository.TicketRepository;
+import com.example.repository.TripRepository;
 import com.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.awt.*;
 import java.security.Principal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +32,13 @@ public class TicketServiceTest {
     private TicketRepository ticketRepository;
 
     @Mock
+    private TripRepository tripRepository;
+
+    @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private RoutePointRepository routePointRepository;
 
     @Mock
     private AuditService auditService;
@@ -44,7 +54,7 @@ public class TicketServiceTest {
         userName = "Ivan.@gmail.com";
 
         mockPrincipal = mock(Principal.class);
-        when(mockPrincipal.getName()).thenReturn(userName);
+        lenient().when(mockPrincipal.getName()).thenReturn(userName);
         lenient().doNothing().when(auditService).createNewLog(any(), anyBoolean());
         lenient().doNothing().when(auditService).createNewLog(any(),anyBoolean(),any(),anyString());
     }
@@ -54,7 +64,7 @@ public class TicketServiceTest {
         // --- ARRANGE (Підготовка) ---
         long tripId = 1L;
         int seatNumber = 5;
-
+        when(mockPrincipal.getName()).thenReturn(userName);
         User owner = createTestUser(100L,userName);
 
         Ticket testTicket = createTestTicket(50L,owner);
@@ -103,17 +113,61 @@ public class TicketServiceTest {
         verify(ticketRepository, never()).deleteById(any());
     }
 
-//    @ParameterizedTest
-//    @CsvSource({
-//            "1,2",
-//            "-2,2",
-//            "0,0",
-//            "1,-2"
-//    })
-//    void buyTicket_ShouldBuy_WhenUserIdsMatch(long idTrip,int seatNumber){
-//
-//        assertTrue(ticketRepository.checkSeatIsTaken(idTrip,seatNumber));
-//    }
+    @Test
+    void BuyTicket_ShouldBuy_WhenUserIdsMatch(){
+
+        int startId=8;
+        int endId = 10;
+
+        Route commonRoute = new Route();
+        commonRoute.setIdRoute(5L);
+
+        Ticket mockSavedTicket = new Ticket();
+        mockSavedTicket.setIdTicket(5L);
+
+        User user= createTestUser(2,userName);
+        Trip trip =createTestTrip( createTestRoute(5L) );
+
+        TicketRequest request = new TicketRequest();
+
+        request.setTripId(trip.getIdTrip());
+        request.setStartPointId((long)startId);
+        request.setEndPointId((long)endId);
+
+        RoutePoint mockStartPoint = createTestRoutePoint(startId,"Київ",0);
+        mockStartPoint.setRoute(commonRoute);
+        mockStartPoint.setOrderIndex(1);
+
+        RoutePoint mockEndPoint =createTestRoutePoint(endId,"Львів",400);
+        mockEndPoint.setRoute(commonRoute);
+        mockEndPoint.setOrderIndex(2);
+
+        when(tripRepository.findById(trip.getIdTrip())).thenReturn(Optional.of(trip));
+        when(userRepository.findByEmail(userName)).thenReturn(Optional.of(user));
+
+        when(routePointRepository.findById(request.getStartPointId())).thenReturn(Optional.of(mockStartPoint));
+        when(routePointRepository.findById(request.getEndPointId())).thenReturn(Optional.of(mockEndPoint));
+
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(mockSavedTicket);
+
+        ticketService.buyTicket(request,userName,mockPrincipal);
+
+        verify(ticketRepository).save(any(Ticket.class));
+
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "-2, 2",
+            " 1,-2",
+            " 0, 2"
+    })
+    void buyTicket_WithBadTicketData(long idTrip,int seatNumber)
+    {
+        assertFalse(ticketRepository.checkSeatIsTaken(idTrip,seatNumber));
+    }
+
 
     private User createTestUser(long idUser,String nameUser){
         User user = new User();
@@ -127,5 +181,29 @@ public class TicketServiceTest {
         ticket.setIdTicket(idTicket);
         ticket.setUser(user);
         return ticket;
+    }
+
+    private Trip createTestTrip(Route route){
+        Trip trip= new Trip();
+        trip.setIdTrip(5L);
+        trip.setRoute(route);
+        return trip;
+    }
+    private Route createTestRoute(long idRoute){
+        Route route= new Route();
+        route.setIdRoute(idRoute);
+        return route;
+    }
+
+    private RoutePoint createTestRoutePoint(int idPoint, String namePoint,double prise){
+        City city = new City();
+        RoutePoint routePoint = new RoutePoint();
+
+        city.setName(namePoint);
+
+        routePoint.setCity(city);
+        routePoint.setIdPoint(idPoint);
+        routePoint.setPrice(prise);
+        return routePoint;
     }
 }

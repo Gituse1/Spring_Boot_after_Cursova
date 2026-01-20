@@ -65,9 +65,9 @@ public class TicketServiceTest {
         long tripId = 1L;
         int seatNumber = 5;
         when(mockPrincipal.getName()).thenReturn(userName);
-        User owner = createTestUser(100L,userName);
+        User owner = User.builder().id(100L).name(userName).build();
 
-        Ticket testTicket = createTestTicket(50L,owner);
+        Ticket testTicket = Ticket.builder().idTicket(50L).user(owner).build();
 
         // 4. Навчаємо репозиторії
         lenient().when(ticketRepository.findTakenByTripIdAndSeats(tripId, seatNumber))
@@ -125,8 +125,19 @@ public class TicketServiceTest {
         Ticket mockSavedTicket = new Ticket();
         mockSavedTicket.setIdTicket(5L);
 
-        User user= createTestUser(2,userName);
-        Trip trip =createTestTrip( createTestRoute(5L) );
+        User user= User.builder()
+                .id(2L)
+                .name(userName)
+                .build();
+
+        Route routeTest =Route.builder()
+                .idRoute(5L)
+                .build();
+
+        Trip trip =Trip.builder()
+                .idTrip(1L)
+                .route(routeTest)
+                .build();
 
         TicketRequest request = new TicketRequest();
 
@@ -134,13 +145,23 @@ public class TicketServiceTest {
         request.setStartPointId((long)startId);
         request.setEndPointId((long)endId);
 
-        RoutePoint mockStartPoint = createTestRoutePoint(startId,"Київ",0);
-        mockStartPoint.setRoute(commonRoute);
-        mockStartPoint.setOrderIndex(1);
+        City startCity =City.builder().idCity(1L).name("Київ").build();
+        RoutePoint mockStartPoint = RoutePoint.builder()
+                .idPoint(startId)
+                .price(0.0)
+                .route(commonRoute)
+                .orderIndex(1)
+                .city(startCity)
+                .build();
 
-        RoutePoint mockEndPoint =createTestRoutePoint(endId,"Львів",400);
-        mockEndPoint.setRoute(commonRoute);
-        mockEndPoint.setOrderIndex(2);
+        City endCity =City.builder().idCity(2L).name("Львів").build();
+        RoutePoint mockEndPoint = RoutePoint.builder()
+                .idPoint(endId)
+                .price(400.0)
+                .route(commonRoute)
+                .orderIndex(2)
+                .city(endCity)
+                .build();
 
         when(tripRepository.findById(trip.getIdTrip())).thenReturn(Optional.of(trip));
         when(userRepository.findByEmail(userName)).thenReturn(Optional.of(user));
@@ -169,41 +190,5 @@ public class TicketServiceTest {
     }
 
 
-    private User createTestUser(long idUser,String nameUser){
-        User user = new User();
-        user.setId(idUser);
-        user.setName(nameUser);
-        return user;
-    }
 
-    private Ticket createTestTicket(long idTicket,User user){
-        Ticket ticket= new Ticket();
-        ticket.setIdTicket(idTicket);
-        ticket.setUser(user);
-        return ticket;
-    }
-
-    private Trip createTestTrip(Route route){
-        Trip trip= new Trip();
-        trip.setIdTrip(5L);
-        trip.setRoute(route);
-        return trip;
-    }
-    private Route createTestRoute(long idRoute){
-        Route route= new Route();
-        route.setIdRoute(idRoute);
-        return route;
-    }
-
-    private RoutePoint createTestRoutePoint(int idPoint, String namePoint,double prise){
-        City city = new City();
-        RoutePoint routePoint = new RoutePoint();
-
-        city.setName(namePoint);
-
-        routePoint.setCity(city);
-        routePoint.setIdPoint(idPoint);
-        routePoint.setPrice(prise);
-        return routePoint;
-    }
 }

@@ -62,15 +62,23 @@ class TripServiceTest {
          LocalTime startTime=LocalTime.of(9,0);
          LocalTime endTime = LocalTime.of(20,0);
 
-        Route route =creteTestRoute(testRouteId,"Test",startTime,endTime);
-        Bus bus =creteTestBus(testBusId,"testPlate");
+        Route route = Route.builder()
+                .idRoute(testRouteId)
+                .nameRoute("TestName")
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
 
-        TripRequest tripRequest = createTestTripRequest(testRouteId,testBusId,LocalDateTime.now());
+        Bus bus = Bus.builder()
+                .idBus(testBusId)
+                .plateNumber("testPlate")
+                .totalSeats(32)
+                .build();
+
+        TripRequest tripRequest = TripRequest.builder().routeId(testRouteId).busId(testBusId).departureTime(LocalDateTime.now()).build();
 
          when(routeRepository.findById(tripRequest.getRouteId())).thenReturn(Optional.ofNullable(route));
-
          when(busRepository.findById(tripRequest.getBusId())).thenReturn(Optional.ofNullable(bus));
-
          when(tripRepository.checkBusIsBusy(eq(testBusId), any(), any())).thenReturn(false);
 
 
@@ -105,8 +113,20 @@ class TripServiceTest {
 
 
     static Stream<Arguments> provideTripsForTest() {
-        TripRequest trip1 = createTestTripRequest(1L,-5L,LocalDateTime.of(2020,2,1,4,2));
-        TripRequest trip2 = createTestTripRequest(-1L, 2L ,LocalDateTime.of(2021,2,1,4,2));
+        LocalDateTime testDateTime1 = LocalDateTime.of(2020, 2, 1, 4, 2);
+        LocalDateTime testDateTime2 = LocalDateTime.of(2021,2,1,4,2);
+
+        TripRequest trip1 = TripRequest.builder()
+                .routeId(1L)
+                .busId(-5L)
+                .departureTime(testDateTime1)
+                .build();
+
+        TripRequest trip2 = TripRequest.builder()
+                .routeId(-1L)
+                .busId(2L)
+                .departureTime(testDateTime2)
+                .build();
 
         return Stream.of(
                 Arguments.of(trip1, true),
@@ -154,32 +174,5 @@ class TripServiceTest {
         verify(tripRepository).findTripsByRouteAndDate(eq(fromId), eq(toId), any(LocalDate.class));
     }
 
-
-
-
-    private static TripRequest createTestTripRequest(Long testRouteId,Long testBusId,LocalDateTime testDepartureTime){
-        TripRequest tripRequest = new TripRequest();
-        tripRequest.setRouteId(testRouteId);
-        tripRequest.setBusId(testBusId);
-        tripRequest.setDepartureTime(testDepartureTime);
-        return  tripRequest;
-    }
-    private static Route creteTestRoute(Long idRoute, String nameRoute, LocalTime startTime, LocalTime endTime){
-        Route route = new Route();
-        route.setIdRoute(idRoute);
-        route.setNameRoute(nameRoute);
-        route.setStartTime(startTime);
-        route.setEndTime(endTime);
-        return route;
-    }
-
-    private static Bus creteTestBus(Long idBus,String plateNumber){
-        Bus bus= new Bus();
-        bus.setIdBus(idBus);
-        bus.setPlateNumber(plateNumber);
-        bus.setTotalSeats(32);
-        return bus;
-
-    }
 
 }

@@ -61,7 +61,6 @@ public class AuthService {
         return user;
     }
 
-
     public String loginUser(LoginRequest request) {
         String userEmail = request.getEmail();
         System.out.println("Точка 1: Початок");

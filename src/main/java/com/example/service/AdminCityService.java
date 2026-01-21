@@ -4,6 +4,7 @@ import com.example.model.*;
 import com.example.repository.*;
 import com.example.model.City;
 import com.example.repository.CityRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,44 +17,63 @@ public class AdminCityService {
 
     private final CityRepository cityRepository;
 
+    private final AuditService auditService;
+
     public City createCity(String name) {
         // 1. Перевірка: чи є вже таке місто?
         if (cityRepository.existsByName(name)) {
+            auditService.createNewLog(ActionType.CREATE_CITY, false);
             throw new IllegalArgumentException("Місто з назвою '" + name + "' вже існує!");
         }
         // 2. Якщо немає - створюємо нове
         City city = new City();
         city.setName(name);
-
+        auditService.createNewLog(ActionType.CREATE_CITY, true);
         return cityRepository.save(city);
     }
 
     public void deleteCity(Long id){
         if(!cityRepository.existsById(id)){
-            cityRepository.deleteById(id);
+            auditService.createNewLog(ActionType.DELETE_CITY, false);
             throw  new IllegalArgumentException("Такого місця не існує");
         }
+        auditService.createNewLog(ActionType.DELETE_CITY, true);
         cityRepository.deleteById(id);
     }
 
     public City updateCity(Long id,  City cityDetails){
 
-        City city = cityRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Місто не знайдено"));
-        city.setName(cityDetails.getName());
+        try {
+            City city = cityRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Місто не знайдено"));
 
-        return cityRepository.save(city);
+            city.setName(cityDetails.getName());
+
+            auditService.createNewLog(ActionType.UPDATE_CITY, true);
+            return cityRepository.save(city);
+
+        } catch (EntityNotFoundException e) {
+
+            auditService.createNewLog(ActionType.UPDATE_CITY, false);
+            throw e;
+        }
     }
 
     public City updateCityName( Long id,  Map<String, String> updates){
         String newName= updates.get("name");
 
         if(newName==null || newName.isEmpty()){
+            auditService.createNewLog(ActionType.UPDATE_CITY, false);
             throw new NullPointerException();
         }
-        City city = cityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("Місто не знайдено"));
+        City city = cityRepository.findById(id).orElseThrow(()->
+        {
+            auditService.createNewLog(ActionType.UPDATE_CITY, false);
+            return new IllegalArgumentException("Місто не знайдено");
+        });
 
         city.setName(newName);
+        auditService.createNewLog(ActionType.UPDATE_CITY, true);
         return cityRepository.save(city);
     }
 

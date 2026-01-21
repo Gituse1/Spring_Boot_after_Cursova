@@ -26,16 +26,18 @@ public class AuditService {
             System.out.println("Помилка логування: Юзера не знайдено");
             return;
         }
-        AuditLog auditLog = new AuditLog();
         Optional<User> newUser= userRepository.findByEmail(email);
         if(newUser.isEmpty()){
             throw new NullPointerException();
         }
         User user = newUser.get();
-        auditLog.setUser(user);
-        auditLog.setAction(action);
-        auditLog.setStatus(status);
-        auditLog.setDetails(details);
+
+        AuditLog auditLog = AuditLog.builder()
+                .user(user)
+                .action(action)
+                .status(status)
+                .details(details)
+                .build();
         auditLogRepository.save(auditLog);
 
     }
@@ -46,16 +48,17 @@ public class AuditService {
             System.out.println("Помилка логування: Юзера не знайдено");
             return;
         }
-        AuditLog auditLog = new AuditLog();
         Optional<User> newUser= userRepository.findByEmail(null);
         if(newUser.isEmpty()){
             throw new NullPointerException();
         }
         User user = newUser.get();
-        auditLog.setUser(user);
-        auditLog.setAction(action);
-        auditLog.setStatus(status);
-        auditLog.setDetails(null);//Тут має бути дані які викликали помилку
+        AuditLog auditLog = AuditLog.builder()
+                .user(user)
+                .action(action)
+                .status(status)
+                .details(null)
+                .build();
         auditLogRepository.save(auditLog);
 
     }
@@ -66,16 +69,20 @@ public class AuditService {
             System.out.println("Помилка логування: Юзера не знайдено");
             return;
         }
-        AuditLog auditLog = new AuditLog();
         Optional<User> newUser= userRepository.findByEmail(email);
+
         if(newUser.isEmpty()){
             throw new NullPointerException();
         }
+
         User user = newUser.get();
-        auditLog.setUser(user);
-        auditLog.setAction(action);
-        auditLog.setStatus(status);
-        auditLog.setDetails(null);
+
+        AuditLog auditLog = AuditLog.builder()
+                .user(user)
+                .action(action)
+                .status(status)
+                .details(null)
+                .build();
         auditLogRepository.save(auditLog);
 
     }

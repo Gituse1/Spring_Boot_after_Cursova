@@ -60,10 +60,11 @@ public class TripService  {
 
         auditService.createNewLog(ActionType.FIND_BUS, true);
 
-        Trip trip = new Trip();
-        trip.setRoute(route);
-        trip.setBus(bus);
-        trip.setDepartureTime(request.getDepartureTime());
+        Trip trip = Trip.builder()
+                .route(route)
+                .bus(bus)
+                .departureTime(request.getDepartureTime())
+                .build();
 
         return tripRepository.save(trip);
     }
@@ -74,8 +75,9 @@ public class TripService  {
 
     @Transactional
     public List<Trip> searchTrips(Long fromCityId, Long toCityId, String dateStr) {
-        // Якщо дата прийшла, перетворюємо її. Якщо ні — буде null.
+
         if (dateStr == null || dateStr.isEmpty()){
+            auditService.createNewLog(ActionType.SEARCH_TRIP, false);
             throw new IllegalArgumentException("Не відповідна дата");
         }
 
@@ -83,12 +85,12 @@ public class TripService  {
             // Цей метод очікує формат "2023-12-31" за замовчуванням
             LocalDate.parse(dateStr);
         } catch (DateTimeParseException e) {
-
+            auditService.createNewLog(ActionType.SEARCH_TRIP, false);
             throw new IllegalArgumentException("Невірний формат дати: '" + dateStr + "'. Очікується формат РРРР-ММ-ДД (наприклад 2025-01-20).");
         }
         LocalDate searchDate = LocalDate.parse(dateStr);
 
-        return tripRepository.findTripsByRouteAndDate(fromCityId,toCityId,LocalDate.parse(dateStr));
+        return tripRepository.findTripsByRouteAndDate(fromCityId, toCityId, searchDate);
 
     }
 }

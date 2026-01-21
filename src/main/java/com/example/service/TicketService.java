@@ -82,13 +82,14 @@ public class TicketService  {
 
             // --- Збереження та успішний лог ---
 
-            Ticket ticket = new Ticket();
-            ticket.setTrip(trip);
-            ticket.setUser(user);
-            ticket.setStartPoint(startPoint);
-            ticket.setEndPoint(endPoint);
-            ticket.setSeatNumber(request.getSeatNumber());
-            ticket.setPrice(ticketPrice);
+            Ticket ticket = Ticket.builder()
+                    .trip(trip)
+                    .user(user)
+                    .startPoint(startPoint)
+                    .endPoint(endPoint)
+                    .seatNumber(request.getSeatNumber())
+                    .price(ticketPrice)
+                    .build();
 
             Ticket savedTicket = ticketRepository.save(ticket);
 

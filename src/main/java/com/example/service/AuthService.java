@@ -41,7 +41,6 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         newUser.setPassword(encodedPassword);
         userRepository.save(newUser);
-        //auditService.createNewLog(ActionType.REGISTRATION, true, "User ID: " + request.getEmail(), null);
     }
 
     public UserResponse getCurrentUserDetails(Authentication authentication) {

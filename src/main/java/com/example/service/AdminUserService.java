@@ -19,23 +19,23 @@ public class AdminUserService {
     public Admin updateUser(long id , Admin userDetails) {
         Admin user = adminRepository.findById(id)
                 .orElseThrow(() ->{
-                    auditService.createNewLog(ActionType.UPDATE_USER_DATA, false);
+                    auditService.log(ActionType.UPDATE_USER_DATA, false);
                   return new IllegalArgumentException("Користувач не знайдений");
                 });
 
         user.setName(userDetails.getName());
-        auditService.createNewLog(ActionType.UPDATE_USER_DATA, true);
+        auditService.log(ActionType.UPDATE_USER_DATA, true);
         return adminRepository.save(user);
     }
 
     public void deleteUser( long id){
         if(!adminRepository.existsById(id)){
-            auditService.createNewLog(ActionType.DELETE_USER, false);
+            auditService.log(ActionType.DELETE_USER, false);
             throw new IllegalArgumentException("Користувача не знайдено ");
         }
 
         adminRepository.deleteById(id);
-        auditService.createNewLog(ActionType.DELETE_USER, true);
+        auditService.log(ActionType.DELETE_USER, true);
     }
 
     public List<Admin> getUsers(){

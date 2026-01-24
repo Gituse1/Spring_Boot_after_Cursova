@@ -40,25 +40,25 @@ public class TripService  {
         );
 
         if (isBusBusy) {
-            auditService.createNewLog(ActionType.CREATE_TRIP,false);
+            auditService.log(ActionType.CREATE_TRIP,false);
             throw new IllegalArgumentException("Bus is busy! It has another trip between " + startRange + " and " + endRange);
         }
 
         Route route = routeRepository.findById(request.getRouteId())
                 .orElseThrow(() -> {
-                    auditService.createNewLog(ActionType.CREATE_TRIP, false);
+                    auditService.log(ActionType.CREATE_TRIP, false);
                     return new EntityNotFoundException("Route not found with id: " + request.getRouteId());
                 });
 
-        auditService.createNewLog(ActionType.CREATE_TRIP, true);
+        auditService.log(ActionType.CREATE_TRIP, true);
 
         Bus bus = busRepository.findById(request.getBusId())
                 .orElseThrow(() -> {
-                    auditService.createNewLog(ActionType.CREATE_TRIP, false);
+                    auditService.log(ActionType.CREATE_TRIP, false);
                     return new EntityNotFoundException("Bus not found with id: " + request.getBusId());
                 });
 
-        auditService.createNewLog(ActionType.FIND_BUS, true);
+        auditService.log(ActionType.FIND_BUS, true);
 
         Trip trip = Trip.builder()
                 .route(route)
@@ -77,7 +77,7 @@ public class TripService  {
     public List<Trip> searchTrips(Long fromCityId, Long toCityId, String dateStr) {
 
         if (dateStr == null || dateStr.isEmpty()){
-            auditService.createNewLog(ActionType.SEARCH_TRIP, false);
+            auditService.log(ActionType.SEARCH_TRIP, false);
             throw new IllegalArgumentException("Не відповідна дата");
         }
 
@@ -85,7 +85,7 @@ public class TripService  {
             // Цей метод очікує формат "2023-12-31" за замовчуванням
             LocalDate.parse(dateStr);
         } catch (DateTimeParseException e) {
-            auditService.createNewLog(ActionType.SEARCH_TRIP, false);
+            auditService.log(ActionType.SEARCH_TRIP, false);
             throw new IllegalArgumentException("Невірний формат дати: '" + dateStr + "'. Очікується формат РРРР-ММ-ДД (наприклад 2025-01-20).");
         }
         LocalDate searchDate = LocalDate.parse(dateStr);

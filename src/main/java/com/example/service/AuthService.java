@@ -50,13 +50,13 @@ public class AuthService {
 
         if (userOptional.isEmpty()) {
 
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA, false, "Користувача не знайдено в базі (хоча токен є)",authentication.getName());
+            auditService.log(ActionType.UPDATE_USER_DATA, false, "Користувача не знайдено в базі (хоча токен є)",authentication.getName());
             throw new IllegalArgumentException("Користувача на знайдено");
 
         }
         UserResponse user = userMapper.toResponse(userOptional.get());
 
-        auditService.createNewLog(ActionType.LOGIN, true, "Перегляд власного профілю",authentication.getName());
+        auditService.log(ActionType.LOGIN, true, "Перегляд власного профілю",authentication.getName());
         return user;
     }
 
@@ -69,7 +69,7 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(userEmail, request.getPassword())
             );
         } catch (AuthenticationException e) {
-            auditService.createNewLog(ActionType.LOGIN, false, "Невірний логін або пароль", userEmail);
+            auditService.log(ActionType.LOGIN, false, "Невірний логін або пароль", userEmail);
             throw new IllegalArgumentException("Невірні дані для входу");
         }
 
@@ -86,7 +86,7 @@ public class AuthService {
         System.out.println("Точка 4: Юзера оновлено");
 
         String jwtToken = jwtService.generateToken(user);
-        auditService.createNewLog(ActionType.LOGIN, true, "Вхід в систему", userEmail);
+        auditService.log(ActionType.LOGIN, true, "Вхід в систему", userEmail);
 
         System.out.println("Точка 5: Токен згенеровано");
 
@@ -98,14 +98,14 @@ public class AuthService {
         Optional<User> userOptional =userRepository.findByEmail(request.getEmail());
 
         if(userOptional.isEmpty()){
-            auditService.createNewLog(ActionType.UPDATE_USER_DATA,false,"Корисувача не знайдено",request.getEmail());
+            auditService.log(ActionType.UPDATE_USER_DATA,false,"Корисувача не знайдено",request.getEmail());
             throw  new UsernameNotFoundException("Користувача не знайдено");
         }
         User user = userOptional.get();
         String newPassword=request.getNewPassword();
         user.setPassword(newPassword);
         userRepository.save(user);
-        auditService.createNewLog(ActionType.UPDATE_USER_DATA,true,"Пароль користувача було змінено",request.getEmail());
+        auditService.log(ActionType.UPDATE_USER_DATA,true,"Пароль користувача було змінено",request.getEmail());
 
     }
 }

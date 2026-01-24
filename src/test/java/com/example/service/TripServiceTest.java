@@ -51,8 +51,8 @@ class TripServiceTest {
 
     @BeforeEach
     public void before(){
-        lenient().doNothing().when(auditService).createNewLog(any(), anyBoolean());
-        lenient().doNothing().when(auditService).createNewLog(any(),anyBoolean(),any(),anyString());
+        lenient().doNothing().when(auditService).log(any(), anyBoolean());
+        lenient().doNothing().when(auditService).log(any(),anyBoolean(),any(),anyString());
     }
 
     @Test

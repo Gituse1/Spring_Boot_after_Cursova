@@ -45,7 +45,6 @@ public class AdminTripService {
                     return new EntityNotFoundException("Route not found with id: " + request.getRouteId());
                 });
 
-        auditService.log(ActionType.ADMIN_TRIP_CREATE_TRIP_CREATED, LevelLogin.INFO);
 
         Bus bus = busRepository.findById(request.getBusId())
                 .orElseThrow(() -> {

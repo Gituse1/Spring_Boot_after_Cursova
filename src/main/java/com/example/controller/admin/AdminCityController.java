@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 import com.example.model.City;
 import com.example.repository.CityRepository;

@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.admin;
 
 import com.example.dto.Request.TripRequest;
 import com.example.model.Bus;
@@ -6,7 +6,7 @@ import com.example.model.Route;
 import com.example.repository.BusRepository;
 import com.example.repository.RouteRepository;
 import com.example.repository.TripRepository;
-import com.example.service.admin.AdminTripService;
+import com.example.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ public class AdminTripServiceTest {
     private BusRepository busRepository;
 
     @Mock
-    private  AuditService auditService;
+    private AuditService auditService;
 
     @InjectMocks
     private AdminTripService adminTripService;

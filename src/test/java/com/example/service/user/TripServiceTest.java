@@ -1,8 +1,8 @@
-package com.example.service;
+package com.example.service.user;
 
 import com.example.model.Trip;
 import com.example.repository.TripRepository;
-import com.example.service.user.TripService;
+import com.example.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ class TripServiceTest {
 
 
     @Mock
-    private  AuditService auditService;
+    private AuditService auditService;
 
     @InjectMocks
     private TripService tripService;

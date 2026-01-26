@@ -1,11 +1,11 @@
-package com.example.service;
+package com.example.service.user;
 
 import com.example.dto.Request.UpdateProfileRequest;
 import com.example.model.User;
 import com.example.model.UserProfile;
 import com.example.repository.UserProfileRepository;
 import com.example.repository.UserRepository;
-import com.example.service.user.UserProfileService;
+import com.example.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

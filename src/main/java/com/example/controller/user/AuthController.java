@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.user;
 
 import com.example.dto.Request.ChangePasswordRequest;
 import com.example.dto.Request.LoginRequest;
@@ -35,7 +35,7 @@ public class AuthController {
     @GetMapping("/user")
     public ResponseEntity<UserResponse> getCurrentUserDetails(Authentication authentication) {
 
-        UserResponse newUser = authService.getCurrentUserDetails(authentication);
+        UserResponse newUser = authService.getCurrentUserDetails(authentication.getName());
         return ResponseEntity.ok(newUser);
 
     }

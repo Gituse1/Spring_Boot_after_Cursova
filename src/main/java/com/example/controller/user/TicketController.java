@@ -1,8 +1,7 @@
-package com.example.controller;
+package com.example.controller.user;
 
 import com.example.dto.Request.TicketRequest;
 import com.example.dto.Response.TicketResponse;
-import com.example.model.Ticket;
 import com.example.service.user.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

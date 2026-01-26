@@ -1,6 +1,5 @@
-package com.example.controller;
+package com.example.controller.user;
 
-import com.example.dto.Request.TripRequest;
 import com.example.model.Trip;
 import com.example.service.user.TripService;
 import lombok.RequiredArgsConstructor;

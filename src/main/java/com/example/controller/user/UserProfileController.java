@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.user;
 
 import com.example.dto.Request.UpdateProfileRequest;
 import com.example.service.user.UserProfileService;

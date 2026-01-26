@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 
 import com.example.model.Route;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/routes")
+@RequestMapping("/api/admin/routes")
 @CrossOrigin(origins = "http://localhost:3000") // Дозволяємо запити з React
 public class AdminRouteController {
 

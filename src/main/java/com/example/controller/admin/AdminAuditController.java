@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 import com.example.model.AuditLog;
 import com.example.repository.AuditLogRepository;

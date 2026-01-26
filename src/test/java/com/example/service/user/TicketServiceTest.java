@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.user;
 
 import com.example.dto.Request.TicketRequest;
 import com.example.model.*;
@@ -6,7 +6,7 @@ import com.example.repository.RoutePointRepository;
 import com.example.repository.TicketRepository;
 import com.example.repository.TripRepository;
 import com.example.repository.UserRepository;
-import com.example.service.user.TicketService;
+import com.example.service.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

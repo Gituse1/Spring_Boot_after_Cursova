@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 
 import com.example.model.Admin;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/user")
 public class AdminUserController {
 
   private final AdminUserService adminUserService;

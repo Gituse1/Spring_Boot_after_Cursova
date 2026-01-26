@@ -1,7 +1,8 @@
-package com.example.service;
+package com.example.service.user;
 
 import com.example.model.*;
 import com.example.repository.TripRepository;
+import com.example.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

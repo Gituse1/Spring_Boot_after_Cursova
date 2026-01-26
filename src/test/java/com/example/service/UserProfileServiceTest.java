@@ -5,6 +5,7 @@ import com.example.model.User;
 import com.example.model.UserProfile;
 import com.example.repository.UserProfileRepository;
 import com.example.repository.UserRepository;
+import com.example.service.user.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,8 +44,8 @@ class UserProfileServiceTest {
 
     @BeforeEach
     public void before(){
-        lenient().doNothing().when(auditService).log(any(),anyBoolean(),any());
-        lenient().doNothing().when(auditService).log(any(),anyBoolean(),anyString(),any());
+        lenient().doNothing().when(auditService).log(any(),any(),any());
+        lenient().doNothing().when(auditService).log(any(),any(),anyString(),any());
     }
 
     @Test

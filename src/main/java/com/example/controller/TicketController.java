@@ -1,14 +1,16 @@
 package com.example.controller;
 
 import com.example.dto.Request.TicketRequest;
+import com.example.dto.Response.TicketResponse;
 import com.example.model.Ticket;
-import com.example.service.TicketService;
+import com.example.service.user.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -22,8 +24,8 @@ public class TicketController {
     public ResponseEntity<?> buyTicket(@RequestBody TicketRequest ticketRequest, Authentication authentication,Principal principal) {
 
         String currentUserEmail = principal.getName();
-        Ticket newTicket = ticketService.buyTicket(ticketRequest, currentUserEmail,principal);
-        return ResponseEntity.ok(newTicket);
+       ticketService.buyTicket(ticketRequest, currentUserEmail);
+        return ResponseEntity.ok("");
 
     }
 
@@ -34,26 +36,26 @@ public class TicketController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Ticket>> getMyTickets(Authentication authentication) {
+    public ResponseEntity<List<TicketResponse>> getMyTickets(Authentication authentication) {
 
             String currentUserEmail = authentication.getName();
-            List<Ticket> tickets = ticketService.findTicketsByUserEmail(currentUserEmail);
+            List<TicketResponse> tickets = ticketService.findTicketsByUserEmail(currentUserEmail);
             return ResponseEntity.ok(tickets);
 
     }
 
-    @DeleteMapping("/<id>")//Обмежити доступ тільки для адміна
-    public ResponseEntity<?> deleteTicket(@PathVariable long id,Principal principal){
+//    @DeleteMapping("/<id>")
+//    public ResponseEntity<?> deleteTicket(@PathVariable long id,Principal principal){
+//
+//            ticketService.deleteTicket(id);
+//            return ResponseEntity.noContent().build();
+//
+//    }
 
-            ticketService.deleteTicket(id,principal);
-            return ResponseEntity.noContent().build();
+    @DeleteMapping("/{name}/{seatNumber}")
+    public ResponseEntity<?> deleteTicket(@PathVariable String name, @PathVariable int seatNumber, Principal principal, LocalDateTime startTime, LocalDateTime endTime) {
 
-    }
-
-    @DeleteMapping("/{tripId}/{seatNumber}")
-    public ResponseEntity<?> deleteTicket(@PathVariable long tripId, @PathVariable int seatNumber, Principal principal) {
-
-            ticketService.deleteTicket(tripId, seatNumber, principal);
+            ticketService.deleteTicket( seatNumber,startTime,endTime, principal);
             return ResponseEntity.noContent().build();
 
     }

@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.user;
 
 import com.example.dto.Request.ChangePasswordRequest;
 import com.example.dto.Request.LoginRequest;
@@ -9,6 +9,8 @@ import com.example.model.LevelLogin;
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import com.example.dto.Response.UserResponse;
+import com.example.service.AuditService;
+import com.example.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

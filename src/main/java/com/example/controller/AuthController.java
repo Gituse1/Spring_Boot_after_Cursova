@@ -4,15 +4,13 @@ import com.example.dto.Request.ChangePasswordRequest;
 import com.example.dto.Request.LoginRequest;
 import com.example.dto.Request.RegisterRequest; // Імпорт нового DTO
 import com.example.dto.Response.UserResponse;
-import com.example.service.AuthService;
-import com.example.service.UserProfileService;
+import com.example.service.user.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 

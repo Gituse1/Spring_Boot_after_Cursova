@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.user;
 
 import com.example.dto.Request.UpdateProfileRequest;
 import com.example.model.ActionType;
@@ -7,6 +7,7 @@ import com.example.model.User;
 import com.example.model.UserProfile;
 import com.example.repository.UserProfileRepository;
 import com.example.repository.UserRepository;
+import com.example.service.AuditService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

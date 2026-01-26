@@ -1,15 +1,19 @@
 package com.example.dto.Response;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TicketResponse {
 
-    private Long tripId;
-    private Long startPointId;
-    private Long endPointId;
+    private String name;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private int seatNumber;
 
 }

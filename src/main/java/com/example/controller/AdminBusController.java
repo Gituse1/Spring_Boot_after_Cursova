@@ -3,7 +3,7 @@ package com.example.controller;
 
 import com.example.model.Bus;
 import com.example.repository.BusRepository;
-import com.example.service.AdminBusService;
+import com.example.service.admin.AdminBusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

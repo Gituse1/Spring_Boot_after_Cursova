@@ -7,8 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "audit_logs")
 @Builder
 @NoArgsConstructor
@@ -35,9 +34,6 @@ public class AuditLog {
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime timestamp;
-
-    @Column(nullable = false)
-    private boolean status;
 
     private String details;
 

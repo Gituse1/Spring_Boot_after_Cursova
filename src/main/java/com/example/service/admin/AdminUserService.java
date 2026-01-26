@@ -1,9 +1,10 @@
-package com.example.service;
+package com.example.service.admin;
 
 import com.example.model.ActionType;
 import com.example.model.Admin;
 import com.example.model.LevelLogin;
 import com.example.repository.AdminRepository;
+import com.example.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

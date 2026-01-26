@@ -6,18 +6,19 @@ import com.example.repository.RoutePointRepository;
 import com.example.repository.TicketRepository;
 import com.example.repository.TripRepository;
 import com.example.repository.UserRepository;
+import com.example.service.user.TicketService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.awt.*;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,131 +51,91 @@ public class TicketServiceTest {
     private  Principal mockPrincipal;
 
     @BeforeEach
-    public void before(){
+    public void before() {
         userName = "Ivan.@gmail.com";
-
         mockPrincipal = mock(Principal.class);
+
         lenient().when(mockPrincipal.getName()).thenReturn(userName);
+        lenient().when(userRepository.existsByEmail(anyString())).thenReturn(true);
+
         lenient().doNothing().when(auditService).log(any(), any());
-        lenient().doNothing().when(auditService).log(any(),any(),any(),anyString());
+        lenient().doNothing().when(auditService).log(any(), any(), any(), anyString());
     }
 
     @Test
-    void deleteTicket_ShouldDelete_WhenUserIdsMatch() {
-        // --- ARRANGE (Підготовка) ---
-        long tripId = 1L;
+    void deleteTicket_ShouldDelete_WhenTicketExists() {
+
         int seatNumber = 5;
-        when(mockPrincipal.getName()).thenReturn(userName);
-        User owner = User.builder().id(100L).name(userName).build();
+        long expectedTicketId = 50L;
+        LocalDateTime start = LocalDateTime.of(2026, 1, 26, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 1, 26, 15, 0);
 
-        Ticket testTicket = Ticket.builder().idTicket(50L).user(owner).build();
-
-        // 4. Навчаємо репозиторії
-        lenient().when(ticketRepository.findTakenByTripIdAndSeats(tripId, seatNumber))
-                .thenReturn(testTicket);
-
-        // Репозиторій юзерів повертає власника
-        lenient().when(userRepository.findUserByEmail(userName))
-                .thenReturn(owner);
+        when(ticketRepository.findIdByDetailsAndTime(anyString(), anyInt(), any(), any()))
+                .thenReturn(Optional.of(expectedTicketId));
 
 
-        // --- ACT (Дія) ---
-        // Викликаємо правильний метод!
-        ticketService.deleteTicket(tripId, seatNumber, mockPrincipal);
+        ticketService.deleteTicket(seatNumber, start, end, mockPrincipal);
 
-        // --- ASSERT (Перевірка) ---
-        // Перевіряємо, що викликано видалення саме цього квитка
-        verify(ticketRepository).deleteById(testTicket.getIdTicket());
+
+        verify(ticketRepository, times(1)).deleteById(expectedTicketId);
+    }
+
+    @Test
+
+    void deleteTicket_ShouldThrowException_WhenTicketNotFoundOrNotOwnedByUser() {
+
+        String hackerEmail = "hacker@example.com";
+        int seatNumber = 5;
+        LocalDateTime start = LocalDateTime.of(2026, 1, 26, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 1, 26, 15, 0);
+
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn(hackerEmail);
+
+
+        when(ticketRepository.findIdByDetailsAndTime(eq(hackerEmail), eq(seatNumber), any(), any()))
+                .thenReturn(Optional.empty());
+
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            ticketService.deleteTicket(seatNumber, start, end, principal);
+        });
+
+
+        verify(ticketRepository, never()).deleteById(anyLong());
 
        }
 
     @Test
-    void deleteTicket_ShouldThrowException_WhenUserIsNotOwner() {
-        String userEmail = "hacker@example.com";
-        Principal principal = mock(Principal.class);
-        when(principal.getName()).thenReturn(userEmail);
-
-        User currentLoggedUser = new User();
-        currentLoggedUser.setId(999L);
-
-        User realOwner = new User();
-        realOwner.setId(100L);
-
-        Ticket ticket = new Ticket();
-        ticket.setUser(realOwner);
-
-        when(ticketRepository.findTakenByTripIdAndSeats(1L, 5)).thenReturn(ticket);
-        when(userRepository.findUserByEmail(userEmail)).thenReturn(currentLoggedUser);
-
-        assertThrows(SecurityException.class, () -> {
-            ticketService.deleteTicket(1L, 5, principal);
-        });
-
-        verify(ticketRepository, never()).deleteById(any());
-    }
-
-    @Test
-    void BuyTicket_ShouldBuy_WhenUserIdsMatch(){
-
-        int startId=8;
-        int endId = 10;
-
-        Route commonRoute = new Route();
-        commonRoute.setIdRoute(5L);
-
-        Ticket mockSavedTicket = new Ticket();
-        mockSavedTicket.setIdTicket(5L);
-
-        User user= User.builder()
-                .id(2L)
-                .name(userName)
-                .build();
-
-        Route routeTest =Route.builder()
-                .idRoute(5L)
-                .build();
-
-        Trip trip =Trip.builder()
-                .idTrip(1L)
-                .route(routeTest)
-                .build();
+    void BuyTicket_ShouldBuy_WhenUserIdsMatch() {
+        Bus bus = Bus.builder().totalSeats(50).build();
+        Route commonRoute = Route.builder().idRoute(5L).build();
+        User user = User.builder().id(2L).email(userName).build();
+        Trip trip = Trip.builder().idTrip(1L).route(commonRoute).bus(bus).build();
 
         TicketRequest request = new TicketRequest();
+        request.setTripId(1L);
+        request.setSeatNumber(5);
+        request.setStartPointId(8L);
+        request.setEndPointId(10L);
 
-        request.setTripId(trip.getIdTrip());
-        request.setStartPointId((long)startId);
-        request.setEndPointId((long)endId);
-
-        City startCity =City.builder().idCity(1L).name("Київ").build();
         RoutePoint mockStartPoint = RoutePoint.builder()
-                .idPoint(startId)
-                .price(0.0)
-                .route(commonRoute)
-                .orderIndex(1)
-                .city(startCity)
-                .build();
-
-        City endCity =City.builder().idCity(2L).name("Львів").build();
+                .idPoint(8).price(100.0).route(commonRoute).orderIndex(1).build();
         RoutePoint mockEndPoint = RoutePoint.builder()
-                .idPoint(endId)
-                .price(400.0)
-                .route(commonRoute)
-                .orderIndex(2)
-                .city(endCity)
-                .build();
+                .idPoint(10).price(400.0).route(commonRoute).orderIndex(2).build();
 
-        when(tripRepository.findById(trip.getIdTrip())).thenReturn(Optional.of(trip));
+        // Стріктні налаштування для цього тесту
+        when(tripRepository.findById(1L)).thenReturn(Optional.of(trip));
         when(userRepository.findByEmail(userName)).thenReturn(Optional.of(user));
+        when(routePointRepository.findById(8L)).thenReturn(Optional.of(mockStartPoint));
+        when(routePointRepository.findById(10L)).thenReturn(Optional.of(mockEndPoint));
 
-        when(routePointRepository.findById(request.getStartPointId())).thenReturn(Optional.of(mockStartPoint));
-        when(routePointRepository.findById(request.getEndPointId())).thenReturn(Optional.of(mockEndPoint));
+        lenient().when(tripRepository.isSeatOccupied(anyLong(), anyInt(), anyLong(), anyLong()))
+                .thenReturn(false);
 
-        when(ticketRepository.save(any(Ticket.class))).thenReturn(mockSavedTicket);
-
-        ticketService.buyTicket(request,userName,mockPrincipal);
+        ticketService.buyTicket(request, userName);
 
         verify(ticketRepository).save(any(Ticket.class));
-
     }
 
 

@@ -2,7 +2,7 @@ package com.example.controller;
 
 import com.example.model.AuditLog;
 import com.example.repository.AuditLogRepository;
-import com.example.service.AdminAuditService;
+import com.example.service.admin.AdminAuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

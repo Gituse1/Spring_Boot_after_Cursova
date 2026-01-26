@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import com.example.dto.Request.UpdateProfileRequest;
-import com.example.service.UserProfileService;
+import com.example.service.user.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

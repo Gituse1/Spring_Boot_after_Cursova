@@ -2,7 +2,7 @@ package com.example.controller;
 
 
 import com.example.model.Admin;
-import com.example.service.AdminUserService;
+import com.example.service.admin.AdminUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

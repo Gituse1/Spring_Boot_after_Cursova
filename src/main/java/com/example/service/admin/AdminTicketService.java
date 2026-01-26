@@ -1,8 +1,9 @@
-package com.example.service;
+package com.example.service.admin;
 
 import com.example.model.ActionType;
 import com.example.model.LevelLogin;
 import com.example.repository.TicketRepository;
+import com.example.service.AuditService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;

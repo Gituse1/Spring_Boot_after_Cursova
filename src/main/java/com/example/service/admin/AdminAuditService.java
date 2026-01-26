@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.admin;
 
 import com.example.model.AuditLog;
 import com.example.repository.AuditLogRepository;

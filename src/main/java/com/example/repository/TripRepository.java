@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TripRepository extends JpaRepository<Trip,Long> {
@@ -35,4 +36,24 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             @Param("toId") Long toId,
             @Param("searchDate") LocalDate searchDate
     );
+
+    @Query("""
+           SELECT COUNT(t) > 0 
+           FROM Ticket t 
+           WHERE t.trip.id = :tripId 
+             AND t.seatNumber = :seatNumber
+             AND (
+                  (t.startPoint.orderIndex < :endOrderIndex AND t.endPoint.orderIndex > :startOrderIndex)
+             )
+           """)
+    boolean isSeatOccupied(
+            @Param("tripId") Long tripId,
+            @Param("seatNumber") int seatNumber,
+            @Param("startOrderIndex") long startOrderIndex,
+            @Param("endOrderIndex") long endOrderIndex
+    );
+
+
+
+
 }

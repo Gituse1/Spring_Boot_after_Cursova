@@ -2,7 +2,7 @@ package com.example.controller;
 
 import com.example.model.City;
 import com.example.repository.CityRepository;
-import com.example.service.AdminCityService;
+import com.example.service.admin.AdminCityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

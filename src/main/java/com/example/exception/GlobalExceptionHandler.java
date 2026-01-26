@@ -3,6 +3,7 @@ package com.example.exception;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -41,6 +42,10 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<String> handleForbidden(DateTimeParseException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleForbidden(BadCredentialsException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 

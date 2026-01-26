@@ -5,11 +5,13 @@ import com.example.dto.Request.LoginRequest;
 import com.example.dto.Request.RegisterRequest;
 import com.example.mapper.UserMapper;
 import com.example.model.ActionType;
+import com.example.model.LevelLogin;
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import com.example.dto.Response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -50,13 +52,13 @@ public class AuthService {
 
         if (userOptional.isEmpty()) {
 
-            auditService.log(ActionType.UPDATE_USER_DATA, false, "Користувача не знайдено в базі (хоча токен є)",authentication.getName());
+            auditService.log(ActionType.USER_AUTH_GET_DETAIL_USER_NOT_FOUND, LevelLogin.ERROR, "Користувача не знайдено в базі (хоча токен є)",authentication.getName());
             throw new IllegalArgumentException("Користувача на знайдено");
 
         }
         UserResponse user = userMapper.toResponse(userOptional.get());
 
-        auditService.log(ActionType.LOGIN, true, "Перегляд власного профілю",authentication.getName());
+        auditService.log(ActionType.USER_AUTH_GET_DETAIL_USER_GET_DETAIL, LevelLogin.INFO, "Перегляд власного профілю",authentication.getName());
         return user;
     }
 
@@ -69,24 +71,25 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(userEmail, request.getPassword())
             );
         } catch (AuthenticationException e) {
-            auditService.log(ActionType.LOGIN, false, "Невірний логін або пароль", userEmail);
+            auditService.log(ActionType.USER_AUTH_LOGIN_INCORRECT_PASSWORD, LevelLogin.ERROR,  userEmail);
             throw new IllegalArgumentException("Невірні дані для входу");
         }
 
         System.out.println("Точка 2: Аутентифікація успішна");
 
         var user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Користувача не знайдено"));
+                .orElseThrow(() ->{
+                    auditService.log(ActionType.USER_AUTH_LOGIN_INCORRECT_LOGIN, LevelLogin.ERROR,  userEmail);
+                    return new BadCredentialsException("Невірний логін або пароль");
+                });
 
         System.out.println("Точка 3: Юзера знайдено");
 
         user.setActive(true);
         userRepository.save(user);
 
-        System.out.println("Точка 4: Юзера оновлено");
-
         String jwtToken = jwtService.generateToken(user);
-        auditService.log(ActionType.LOGIN, true, "Вхід в систему", userEmail);
+        auditService.log(ActionType.USER_AUTH_LOGIN_CORRECT, LevelLogin.INFO, "Вхід в систему", userEmail);
 
         System.out.println("Точка 5: Токен згенеровано");
 
@@ -98,14 +101,14 @@ public class AuthService {
         Optional<User> userOptional =userRepository.findByEmail(request.getEmail());
 
         if(userOptional.isEmpty()){
-            auditService.log(ActionType.UPDATE_USER_DATA,false,"Корисувача не знайдено",request.getEmail());
+            auditService.log(ActionType.USER_AUTH_UPDATE_USER_NOT_FOUND,LevelLogin.ERROR,"Корисувача не знайдено",request.getEmail());
             throw  new UsernameNotFoundException("Користувача не знайдено");
         }
         User user = userOptional.get();
         String newPassword=request.getNewPassword();
         user.setPassword(newPassword);
         userRepository.save(user);
-        auditService.log(ActionType.UPDATE_USER_DATA,true,"Пароль користувача було змінено",request.getEmail());
+        auditService.log(ActionType.USER_AUTH_UPDATE_USER_PASSWORD_UPDATE,LevelLogin.INFO,"Пароль користувача було змінено",request.getEmail());
 
     }
 }

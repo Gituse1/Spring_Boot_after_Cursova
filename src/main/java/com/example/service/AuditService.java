@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.model.ActionType;
 import com.example.model.AuditLog;
+import com.example.model.LevelLogin;
 import com.example.model.User;
 import com.example.repository.AuditLogRepository;
 import com.example.repository.UserRepository;
@@ -19,7 +20,7 @@ public class AuditService {
     private final UserRepository userRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void log(ActionType action, boolean status,String details,String email){
+    public void log(ActionType action, LevelLogin levelLogin, String event, String email){
         if(action==null){
             System.out.println("Помилка логування: Юзера не знайдено");
             return;
@@ -30,21 +31,21 @@ public class AuditService {
         AuditLog auditLog = AuditLog.builder()
                 .user(user)
                 .action(action)
-                .status(status)
-                .details(details)
+                .details(event)
+                .levelLogin(levelLogin)
                 .build();
         auditLogRepository.save(auditLog);
 
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void log(ActionType action, boolean status){
-       log(action,status,null,null);
+    public void log(ActionType action,LevelLogin levelLogin){
+       log(action,levelLogin,null,null);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void log(ActionType action, boolean status,String email){
-        log(action,status,email,null);
+    public void log(ActionType action, LevelLogin levelLogin,String email){
+        log(action,levelLogin,email,null);
     }
-
+//String event
 }

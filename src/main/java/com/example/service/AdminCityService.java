@@ -23,7 +23,7 @@ public class AdminCityService {
         // 1. Перевірка: чи є вже таке місто?
         if (cityRepository.existsByName(name)) {
 
-            auditService.log(ActionType.CREATE_CITY, false);
+            auditService.log(ActionType.ADMIN_CITY_CREATE_NOT_FOUND,LevelLogin.ERROR);
             throw new IllegalArgumentException("Місто з назвою '" + name + "' вже існує!");
         }
 
@@ -32,18 +32,18 @@ public class AdminCityService {
                 .name(name)
                 .build();
 
-        auditService.log(ActionType.CREATE_CITY, true);
+        auditService.log(ActionType.ADMIN_CITY_CREATE_CITY_CREATED,LevelLogin.INFO);
         return cityRepository.save(city);
     }
 
     public void deleteCity(Long id){
         if(!cityRepository.existsById(id)){
 
-            auditService.log(ActionType.DELETE_CITY, false);
+            auditService.log(ActionType.ADMIN_CITY_DELETE_NOT_FOUND,LevelLogin.ERROR);
             throw  new IllegalArgumentException("Такого місця не існує");
         }
 
-        auditService.log(ActionType.DELETE_CITY, true);
+        auditService.log(ActionType.ADMIN_CITY_DELETE_DELETED,LevelLogin.INFO);
 
         cityRepository.deleteById(id);
     }
@@ -56,12 +56,12 @@ public class AdminCityService {
 
             city.setName(cityDetails.getName());
 
-            auditService.log(ActionType.UPDATE_CITY, true);
+            auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_UPDATED,LevelLogin.INFO);
             return cityRepository.save(city);
 
         } catch (EntityNotFoundException e) {
 
-            auditService.log(ActionType.UPDATE_CITY, false);
+            auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_NAME_NOT_FOUND,LevelLogin.ERROR);
             throw e;
         }
     }
@@ -70,17 +70,17 @@ public class AdminCityService {
         String newName= updates.get("name");
 
         if(newName==null || newName.isEmpty()){
-            auditService.log(ActionType.UPDATE_CITY, false);
+            auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_NAME_NOT_FOUND,LevelLogin.ERROR);
             throw new NullPointerException();
         }
         City city = cityRepository.findById(id).orElseThrow(()->
         {
-            auditService.log(ActionType.UPDATE_CITY, false);
+            auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_NAME_NOT_FOUND,LevelLogin.ERROR);
             return new IllegalArgumentException("Місто не знайдено");
         });
 
         city.setName(newName);
-        auditService.log(ActionType.UPDATE_CITY, true);
+        auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_UPDATED,LevelLogin.INFO);
         return cityRepository.save(city);
     }
 

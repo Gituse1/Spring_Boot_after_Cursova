@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.dto.Request.UpdateProfileRequest;
 import com.example.model.ActionType;
+import com.example.model.LevelLogin;
 import com.example.model.User;
 import com.example.model.UserProfile;
 import com.example.repository.UserProfileRepository;
@@ -27,7 +28,7 @@ public class UserProfileService {
         Optional<User> userOptional =userRepository.findByEmail(email);
 
         if(userOptional.isEmpty()){
-            auditService.log(ActionType.UPDATE_USER_DATA,false,email);
+            auditService.log(ActionType.USER_USER_PROFILE_UPDATE_PROFILES_INCORRECT_LOGIN,LevelLogin.ERROR,email);
             throw  new UsernameNotFoundException("User not found");
         }
         User user = userOptional.get();
@@ -48,35 +49,34 @@ public class UserProfileService {
 
        updateProfileBio(profile,request,email);
 
-
         profileRepository.save(profile);
     }
 
     private   void updateProfilePhoneNumber(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
             profile.setPhoneNumber(request.getPhoneNumber());
-            auditService.log(ActionType.UPDATE_USER_DATA,true,email);
+            auditService.log(ActionType.USER_USER_PROFILE_UPDATE_PHONE_NUMBER_UPDATED,LevelLogin.INFO,email);
         }
     }
 
     private   void updateProfileAddress(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getAddress() != null && !request.getAddress().isBlank()) {
             profile.setAddress(request.getAddress());
-            auditService.log(ActionType.UPDATE_USER_DATA,true,email);
+            auditService.log(ActionType.USER_USER_PROFILE_UPDATE_ADDRESS_UPDATED,LevelLogin.INFO,email);
         }
     }
 
     private   void updateProfileCity(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getCity() != null && !request.getCity().isBlank()) {
             profile.setCity(request.getCity());
-            auditService.log(ActionType.UPDATE_USER_DATA,true,email);
+            auditService.log(ActionType.USER_USER_PROFILE_PROFILE_CITY_NUMBER_UPDATED,LevelLogin.INFO,email);
         }
     }
 
     private   void updateProfileBio(UserProfile profile,UpdateProfileRequest request,String email){
         if (request.getBio() != null) {
             profile.setBio(request.getBio());
-            auditService.log(ActionType.UPDATE_USER_DATA,true,email);
+            auditService.log(ActionType.USER_USER_PROFILE_PROFILE_BIO_UPDATED, LevelLogin.INFO,email);
         }
     }
 }

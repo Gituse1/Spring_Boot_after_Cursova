@@ -41,25 +41,25 @@ public class TicketService  {
 
             Trip trip = tripRepository.findById(request.getTripId())
                     .orElseThrow(() -> {
-                        auditService.log(ActionType.BOOK_TICKET,false);
+                        auditService.log(ActionType.USER_TICKET_BUY_TICKET_TRIP_NOT_FOUND,LevelLogin.ERROR);
                         return new EntityNotFoundException("Рейс не знайдено з ID: " + request.getTripId());
                     });
 
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> {
-                        auditService.log(ActionType.CREATE_TRIP,false);
+                        auditService.log(ActionType.USER_TICKET_BUY_TICKET_INCORRECT_LOGIN,LevelLogin.ERROR);
                         return new EntityNotFoundException("Користувача з email " + email + " не знайдено");
                     });
 
             RoutePoint startPoint = routePointRepository.findById(request.getStartPointId())
                     .orElseThrow(() -> {
-                        auditService.log(ActionType.CREATE_TRIP,false);
+                        auditService.log(ActionType.USER_TICKET_BUY_TICKET_POINT_NOT_FOUND,LevelLogin.ERROR);
                         return new EntityNotFoundException("Точку відправлення не знайдено");
                     });
 
             RoutePoint endPoint = routePointRepository.findById(request.getEndPointId())
                     .orElseThrow(() -> {
-                        auditService.log(ActionType.CREATE_TRIP,false);
+                        auditService.log(ActionType.USER_TICKET_BUY_TICKET_POINT_NOT_FOUND,LevelLogin.ERROR);
                         return new EntityNotFoundException("Точку прибуття не знайдено");
                     });
 
@@ -95,8 +95,8 @@ public class TicketService  {
 
             // Лог успіху
             auditService.log(
-                    ActionType.BOOK_TICKET,
-                    true,
+                    ActionType.USER_TICKET_BUY_TICKET_CREATED,
+                    LevelLogin.INFO,
                     "Ticket ID: " + savedTicket.getIdTicket() + ", User: " ,
                     principal.getName()
             );
@@ -107,13 +107,12 @@ public class TicketService  {
             // --- Єдине місце для логування помилок ---
 
             auditService.log(
-                    ActionType.BOOK_TICKET,
-                    false,
+                    ActionType.USER_TICKET_BUY_TICKET_TICKET_NOT_CREATED,
+                    LevelLogin.ERROR,
                     "Ticket ID: None, Error: " + e.getMessage(), // Корисно додати текст помилки
                     principal.getName()
             );
 
-            // Обов'язково прокидаємо помилку далі, щоб контролер знав про збій
             throw e;
         }
     }
@@ -135,34 +134,23 @@ public class TicketService  {
     public void deleteTicket( long tripId,  int seatNumber, Principal principal){
         if(tripId==0||seatNumber==0){
 
-            auditService.log(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId + ", Seat: " + seatNumber,principal.getName());
+            auditService.log(ActionType.USER_TICKET_DELETE_TICKET_SEAT_NUMBER_NOT_FOUND, LevelLogin.ERROR, "Trip ID: " + tripId + ", Seat: " + seatNumber,principal.getName());
             throw new  IllegalArgumentException("невірні дані");
         }
         Ticket ticket=ticketRepository.findTakenByTripIdAndSeats(tripId,seatNumber);
         User user= userRepository.findUserByEmail(principal.getName());
         if (ticket == null) {
-            auditService.log(ActionType.DELETE_TICKET, false, "Ticket not found", principal.getName());
+            auditService.log(ActionType.USER_TICKET_DELETE_TICKET_TICKET_NOT_FOUND, LevelLogin.ERROR, "Ticket not found", principal.getName());
             throw new RuntimeException("Квиток не знайдено");
         }
 
         if (!ticket.getUser().getId().equals(user.getId())) {
-            auditService.log(ActionType.DELETE_TICKET, false, "Trip ID: " + tripId, principal.getName());
+            auditService.log(ActionType.USER_TICKET_DELETE_TICKET_SEAT_NUMBER_NOT_BELONG_USER, LevelLogin.ERROR, "Trip ID: " + tripId, principal.getName());
             throw new SecurityException("Це не ваш квиток!");
         }
 
         ticketRepository.deleteById((long) ticket.getIdTicket());
-        auditService.log(ActionType.DELETE_TICKET, true, "Trip ID: " + tripId, principal.getName());
+        auditService.log(ActionType.USER_TICKET_DELETE_TICKET_TICKET_DELETED, LevelLogin.INFO, "Trip ID: " + tripId, principal.getName());
     }
 
-
-    public void deleteTicket(@PathVariable long id,Principal principal){
-        if(!ticketRepository.existsById(id)){
-
-            auditService.log(ActionType.DELETE_TICKET, false, "Ticket ID: " + id + ", User: Admin ", principal.getName());
-            throw  new IllegalArgumentException("Невірні данні id"+ id);
-        }
-        ticketRepository.deleteById(id);
-        auditService.log(ActionType.DELETE_TICKET, true, "Ticket ID: " + id + ", User: Admin ", principal.getName());
-
-    }
 }

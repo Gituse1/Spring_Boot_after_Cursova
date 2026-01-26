@@ -55,8 +55,8 @@ public class TicketServiceTest {
 
         mockPrincipal = mock(Principal.class);
         lenient().when(mockPrincipal.getName()).thenReturn(userName);
-        lenient().doNothing().when(auditService).log(any(), anyBoolean());
-        lenient().doNothing().when(auditService).log(any(),anyBoolean(),any(),anyString());
+        lenient().doNothing().when(auditService).log(any(), any());
+        lenient().doNothing().when(auditService).log(any(),any(),any(),anyString());
     }
 
     @Test

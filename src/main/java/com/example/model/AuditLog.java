@@ -28,6 +28,10 @@ public class AuditLog {
     @Enumerated(EnumType.STRING)
     private ActionType action;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LevelLogin levelLogin;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime timestamp;

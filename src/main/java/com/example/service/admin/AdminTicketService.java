@@ -20,11 +20,11 @@ public class AdminTicketService {
     public void deleteTicket(@PathVariable long id, Principal principal){
         if(!ticketRepository.existsById(id)){
 
-            auditService.log(ActionType.ADMIN_TICKET_DELETE_TICKET_INCORRECT_ID, LevelLogin.ERROR, "Ticket ID: " + id + ", User: Admin ", principal.getName());
+            auditService.log(ActionType.ADMIN_TICKET_DELETE_TICKET_INCORRECT_ID, LevelLogin.ERROR, principal.getName());
             throw  new IllegalArgumentException("Невірні данні id"+ id);
         }
         ticketRepository.deleteById(id);
-        auditService.log(ActionType.ADMIN_TICKET_DELETE_TICKET_DELETED, LevelLogin.INFO, "Ticket ID: " + id + ", User: Admin ", principal.getName());
+        auditService.log(ActionType.ADMIN_TICKET_DELETE_TICKET_DELETED, LevelLogin.INFO, principal.getName());
 
     }
 }

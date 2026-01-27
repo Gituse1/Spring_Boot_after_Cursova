@@ -8,11 +8,13 @@ import com.example.repository.TripRepository;
 import com.example.service.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 
 @RequiredArgsConstructor
+@Service
 public class AdminTripService {
 
     private final RouteRepository routeRepository;

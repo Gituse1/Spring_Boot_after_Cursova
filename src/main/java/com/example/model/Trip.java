@@ -17,7 +17,7 @@ public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_trip")
-    private long  idTrip;
+    private Long  idTrip;
 
     @ManyToOne
     @JoinColumn(name = "route_id")

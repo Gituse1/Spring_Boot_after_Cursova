@@ -20,18 +20,19 @@ public class AuditService {
     private final UserRepository userRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void log(ActionType action, LevelLogin levelLogin, String event, String email){
+    public void log(ActionType action, LevelLogin levelLogin, String email){
         if(action==null){
             System.out.println("Помилка логування: Юзера не знайдено");
             return;
         }
 
         User user = (email != null) ? userRepository.findByEmail(email).orElse(null) : null;
-
+        String eventString = String.format("%s:%s",
+                action.name(),
+                (email != null ? email : "ANONYMOUS"));
         AuditLog auditLog = AuditLog.builder()
                 .user(user)
-                .action(action)
-                .details(event)
+                .action(eventString)
                 .levelLogin(levelLogin)
                 .build();
         auditLogRepository.save(auditLog);
@@ -40,12 +41,7 @@ public class AuditService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(ActionType action,LevelLogin levelLogin){
-       log(action,levelLogin,null,null);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void log(ActionType action, LevelLogin levelLogin,String email){
-        log(action,levelLogin,email,null);
+       log(action ,levelLogin ,null);
     }
 //String event
 }

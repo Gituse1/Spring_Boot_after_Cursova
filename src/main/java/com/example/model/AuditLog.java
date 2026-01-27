@@ -16,7 +16,7 @@ public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_audit_log")
-    private long idAuditLog;
+    private Long idAuditLog;
 
 
     @ManyToOne
@@ -24,8 +24,7 @@ public class AuditLog {
     private User user;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ActionType action;
+    private String action;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

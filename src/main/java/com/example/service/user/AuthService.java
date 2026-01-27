@@ -84,7 +84,7 @@ public class AuthService {
         userRepository.save(user);
 
         String jwtToken = jwtService.generateToken(user);
-        auditService.log(ActionType.USER_AUTH_LOGIN_CORRECT, LevelLogin.INFO, "Вхід в систему", userEmail);
+        auditService.log(ActionType.USER_AUTH_LOGIN_CORRECT, LevelLogin.INFO, userEmail);
 
 
         // ВАЖЛИВО: Повертаємо токен
@@ -95,14 +95,14 @@ public class AuthService {
         Optional<User> userOptional =userRepository.findByEmail(request.getEmail());
 
         if(userOptional.isEmpty()){
-            auditService.log(ActionType.USER_AUTH_UPDATE_USER_NOT_FOUND,LevelLogin.ERROR,"Корисувача не знайдено",request.getEmail());
+            auditService.log(ActionType.USER_AUTH_UPDATE_USER_NOT_FOUND,LevelLogin.ERROR,request.getEmail());
             throw  new UsernameNotFoundException("Користувача не знайдено");
         }
         User user = userOptional.get();
         String newPassword=request.getNewPassword();
         user.setPassword(newPassword);
         userRepository.save(user);
-        auditService.log(ActionType.USER_AUTH_UPDATE_USER_PASSWORD_UPDATE,LevelLogin.INFO,"Пароль користувача було змінено",request.getEmail());
+        auditService.log(ActionType.USER_AUTH_UPDATE_USER_PASSWORD_UPDATE,LevelLogin.INFO,request.getEmail());
 
     }
 }

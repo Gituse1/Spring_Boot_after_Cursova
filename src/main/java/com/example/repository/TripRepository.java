@@ -16,9 +16,11 @@ import java.util.Optional;
 public interface TripRepository extends JpaRepository<Trip,Long> {
     @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END " +
             "FROM Trip t " +
+            "JOIN t.route r " +
+            "JOIN r.routePoints p " +
             "WHERE t.bus.idBus = :busId " +
-            // Логіка: (StartA < EndB) AND (EndA > StartB)
-            "AND (t.departureTime < :newEndTime AND t.arrivalTime > :newStartTime)")
+            "AND p.arrivalTime > :newStartTime " +
+            "AND t.departureTime < :newEndTime")
     boolean checkBusIsBusy(@Param("busId") Long busId,
                            @Param("newStartTime") LocalTime newStartTime,
                            @Param("newEndTime") LocalTime newEndTime);

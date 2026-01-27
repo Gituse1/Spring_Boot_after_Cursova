@@ -18,7 +18,7 @@ public class RoutePoint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_point")
-    private int idPoint;
+    private Long idPoint;
 
     @ManyToOne
     @JsonIgnore

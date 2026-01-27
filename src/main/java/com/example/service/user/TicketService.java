@@ -33,16 +33,28 @@ public class TicketService  {
     public void buyTicket(TicketRequest request, String email){
 
         Trip trip = tripRepository.findById(request.getTripId())
-                .orElseThrow(() -> new EntityNotFoundException("Маршрут не знайдено"));
+                .orElseThrow(() -> {
+                    auditService.log(ActionType.USER_TICKET_BUY_TICKET_TRIP_NOT_FOUND,LevelLogin.ERROR,email);
+                    return new EntityNotFoundException("Маршрут не знайдено");
+                });
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Користувача не знайдено"));
+                .orElseThrow(() -> {
+                    auditService.log(ActionType.USER_TICKET_BUY_TICKET_INCORRECT_LOGIN,LevelLogin.ERROR,email);
+                    return new EntityNotFoundException("Користувача не знайдено");
+                });
 
         RoutePoint startPoint = routePointRepository.findById(request.getStartPointId())
-                .orElseThrow(() -> new EntityNotFoundException("Точку відправлення не знайдено"));
+                .orElseThrow(() ->{
+                    auditService.log(ActionType.USER_TICKET_BUY_TICKET_POINT_NOT_FOUND,LevelLogin.ERROR,email);
+                    return new EntityNotFoundException("Точку відправлення не знайдено");
+                });
 
         RoutePoint endPoint = routePointRepository.findById(request.getEndPointId())
-                .orElseThrow(() -> new EntityNotFoundException("Точку прибуття не знайдено"));
+                .orElseThrow(() ->{
+                    auditService.log(ActionType.USER_TICKET_BUY_TICKET_POINT_NOT_FOUND,LevelLogin.ERROR,email);
+                    return new EntityNotFoundException("Точку прибуття не знайдено");
+                });
 
         int ticketPrice = (int) (endPoint.getPrice() - startPoint.getPrice());
 
@@ -51,9 +63,9 @@ public class TicketService  {
         }
 
 
-        boolean dataIsValid= isValidData(request,startPoint,endPoint,trip);
+       isValidData(request,startPoint,endPoint,trip);
 
-        if(dataIsValid){
+
             Ticket ticket = Ticket.builder()
                     .trip(trip)
                     .user(user)
@@ -64,39 +76,41 @@ public class TicketService  {
                     .build();
 
             ticketRepository.save(ticket);
-            auditService.log(ActionType.USER_TICKET_BUY_TICKET_CREATED, LevelLogin.INFO);
+            auditService.log(ActionType.USER_TICKET_BUY_TICKET_CREATED, LevelLogin.INFO,email);
+            
 
-        }
     }
 
-    private boolean isValidData(TicketRequest request,RoutePoint startPoint, RoutePoint endPoint,Trip trip){
+    private void isValidData(TicketRequest request,RoutePoint startPoint, RoutePoint endPoint,Trip trip){
 
 
         if(request.getSeatNumber()<=0 || request.getSeatNumber()>=trip.getBus().getTotalSeats()){
-            new IllegalArgumentException("В автобусі немає відповідного місця");
-            return false;
+           throw  new IllegalArgumentException("В автобусі немає відповідного місця");
+
         }
 
         Long tripRouteId = trip.getRoute().getIdRoute();
 
         if (!startPoint.getRoute().getIdRoute().equals(tripRouteId) ||
                 !endPoint.getRoute().getIdRoute().equals(tripRouteId)) {
-            throw new IllegalArgumentException("Помилка! Обрані зупинки не належать до маршруту цього рейсу.");
+             throw new IllegalArgumentException("Помилка! Обрані зупинки не належать до маршруту цього рейсу.");
+
         }
 
         if (startPoint.getOrderIndex() >= endPoint.getOrderIndex()) {
             throw new IllegalArgumentException("Помилка! Пункт призначення має бути після пункту відправлення.");
+
         }
 
         boolean isSeatsOccupied = tripRepository.isSeatOccupied(
                 request.getTripId(),request.getSeatNumber(),request.getStartPointId(),request.getEndPointId());
 
         if(isSeatsOccupied){
-            new IllegalArgumentException("Місце " + request.getSeatNumber() + " вже зайняте!");
-            return false;
+           throw  new IllegalArgumentException("Місце " + request.getSeatNumber() + " вже зайняте!");
+
         }
 
-        return true;
+
     }
 
     public List<String> getTakenSeats(Long tripId) {
@@ -120,7 +134,7 @@ public class TicketService  {
 
         Long ticketId = ticketRepository.findIdByDetailsAndTime(email, seatNumber, startTime, endTime)
                 .orElseThrow(() -> {
-                    auditService.log(ActionType.USER_TICKET_DELETE_TICKET_TICKET_NOT_FOUND, LevelLogin.ERROR, "Email: " + email, email);
+                    auditService.log(ActionType.USER_TICKET_DELETE_TICKET_TICKET_NOT_FOUND, LevelLogin.ERROR, email);
                     return new EntityNotFoundException("Квиток не знайдено, видалення неможливе");
                 });
 

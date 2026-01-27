@@ -5,6 +5,7 @@ import com.example.dto.Request.LoginRequest;
 import com.example.dto.Request.RegisterRequest; // Імпорт нового DTO
 import com.example.dto.Response.UserResponse;
 import com.example.service.user.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +42,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request, HttpServletRequest httpServletRequest) {
        authService.registerUser(request);
+        System.out.println(httpServletRequest.getRemoteAddr());
        return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
 
     }

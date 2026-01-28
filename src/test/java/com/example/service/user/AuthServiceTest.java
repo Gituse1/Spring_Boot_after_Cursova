@@ -8,12 +8,15 @@ import com.example.model.User;
 import com.example.repository.UserRepository;
 import com.example.service.AuditService;
 import com.example.service.JwtService;
+import com.example.service.LoginAttemptService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,6 +52,9 @@ class AuthServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
+    @Mock
+    private LoginAttemptService loginAttemptService;
+
 
     @InjectMocks
     private  AuthService authService;
@@ -57,7 +63,7 @@ class AuthServiceTest {
     public void before(){
 
         lenient().doNothing().when(auditService).log(any(),any());
-        lenient().doNothing().when(auditService).log(any(),any(),any(),anyString());
+        lenient().doNothing().when(auditService).log(any(),any(),anyString());
     }
 
     @Test
@@ -107,16 +113,20 @@ class AuthServiceTest {
         String testEmail ="test@gmail.com";
         String testPassword ="125wdw";
         String expectedToken = "valid.jwt.token";
+        String testIP = "192.168.1.1";
 
         LoginRequest request = LoginRequest.builder().email(testEmail).password(testPassword).build();
         User user = User.builder().email(testEmail).password(testPassword).build();
 
+        when(loginAttemptService.isBlocked(testIP)).thenReturn(false);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
         when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
         lenient().when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtService.generateToken(user)).thenReturn(expectedToken);
+        doNothing().when(loginAttemptService).loginSucceeded(testIP);
+        lenient().doNothing().when(loginAttemptService).loginFailed(testIP);
 
-        String actualToken = authService.loginUser(request);
+        String actualToken = authService.loginUser(request,testIP);
 
         assertNotNull(actualToken);
         assertEquals(expectedToken, actualToken);

@@ -45,7 +45,7 @@ class UserProfileServiceTest {
     @BeforeEach
     public void before(){
         lenient().doNothing().when(auditService).log(any(),any(),any());
-        lenient().doNothing().when(auditService).log(any(),any(),anyString(),any());
+        lenient().doNothing().when(auditService).log(any(),any(),anyString());
     }
 
     @Test

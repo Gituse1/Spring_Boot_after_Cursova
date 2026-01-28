@@ -59,7 +59,7 @@ public class TicketServiceTest {
         lenient().when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         lenient().doNothing().when(auditService).log(any(), any());
-        lenient().doNothing().when(auditService).log(any(), any(), any(), anyString());
+        lenient().doNothing().when(auditService).log(any(), any(), anyString());
     }
 
     @Test
@@ -120,9 +120,9 @@ public class TicketServiceTest {
         request.setEndPointId(10L);
 
         RoutePoint mockStartPoint = RoutePoint.builder()
-                .idPoint(8).price(100.0).route(commonRoute).orderIndex(1).build();
+                .idPoint(8L).price(100.0).route(commonRoute).orderIndex(1).build();
         RoutePoint mockEndPoint = RoutePoint.builder()
-                .idPoint(10).price(400.0).route(commonRoute).orderIndex(2).build();
+                .idPoint(10L).price(400.0).route(commonRoute).orderIndex(2).build();
 
         // Стріктні налаштування для цього тесту
         when(tripRepository.findById(1L)).thenReturn(Optional.of(trip));

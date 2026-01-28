@@ -11,6 +11,7 @@ import com.example.repository.UserRepository;
 import com.example.dto.Response.UserResponse;
 import com.example.service.AuditService;
 import com.example.service.JwtService;
+import com.example.service.LoginAttemptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,6 +32,7 @@ public class AuthService {
     private  final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final LoginAttemptService loginAttemptService;
 
     public void registerUser( RegisterRequest request) {
 
@@ -60,7 +62,11 @@ public class AuthService {
         return user;
     }
 
-    public String loginUser(LoginRequest request) {
+    public String loginUser(LoginRequest request,String ip) {
+
+        if (loginAttemptService.isBlocked(ip)) {
+            throw new RuntimeException("Доступ заблоковано на 15 хвилин через забагато невдалих спроб.");
+        }
         String userEmail = request.getEmail();
 
         try {
@@ -87,8 +93,13 @@ public class AuthService {
         auditService.log(ActionType.USER_AUTH_LOGIN_CORRECT, LevelLogin.INFO, userEmail);
 
 
-        // ВАЖЛИВО: Повертаємо токен
-        return jwtToken;
+        try {
+            loginAttemptService.loginSucceeded(ip);
+            return jwtToken;
+        } catch (Exception e) {
+            loginAttemptService.loginFailed(ip); // Додаємо спробу, якщо пароль невірний
+            throw new RuntimeException("Невірний логін або пароль");
+        }
     }
 
     public void updateUserPassword(ChangePasswordRequest request){

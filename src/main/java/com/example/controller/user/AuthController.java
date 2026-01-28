@@ -23,10 +23,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        System.out.println("Точка 0");
-        String token = authService.loginUser(request);
-        // Повертаємо JSON
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpServletRequest ) {
+        String token = authService.loginUser(request,httpServletRequest.getRemoteAddr());
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
 
@@ -42,9 +40,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
        authService.registerUser(request);
-        System.out.println(httpServletRequest.getRemoteAddr());
        return ResponseEntity.ok("Користувач " + request.getName() + " успішно зареєстрований!");
 
     }

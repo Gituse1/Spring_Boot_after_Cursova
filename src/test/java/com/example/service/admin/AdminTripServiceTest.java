@@ -51,7 +51,7 @@ public class AdminTripServiceTest {
     @BeforeEach
     public void before(){
         lenient().doNothing().when(auditService).log(any(), any());
-        lenient().doNothing().when(auditService).log(any(),any(),any(),anyString());
+        lenient().doNothing().when(auditService).log(any(),any(),anyString());
     }
 
     @Test

@@ -9,11 +9,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class LoginAttemptService {
 
-    // Кеш, де ключ — це IP (String), а значення — кількість спроб (Integer)
     private final Cache<String, Integer> attemptsCache;
 
     public LoginAttemptService() {
-        // Налаштовуємо кеш: видаляти запис через 15 хвилин після останнього запису
+
         this.attemptsCache = Caffeine.newBuilder()
                 .expireAfterWrite(15, TimeUnit.MINUTES)
                 .build();

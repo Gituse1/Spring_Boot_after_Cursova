@@ -21,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.core.AuthenticationException;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -102,17 +101,28 @@ public class AuthService {
         }
     }
 
-    public void updateUserPassword(ChangePasswordRequest request){
-        Optional<User> userOptional =userRepository.findByEmail(request.getEmail());
-
-        if(userOptional.isEmpty()){
-            auditService.log(ActionType.USER_AUTH_UPDATE_USER_NOT_FOUND,LevelLogin.ERROR,request.getEmail());
-            throw  new UsernameNotFoundException("Користувача не знайдено");
+    public void updateUserPassword(ChangePasswordRequest request,String ip){
+        if (loginAttemptService.isBlocked(ip)) {
+            throw new RuntimeException("Доступ заблоковано. Спробуйте через 15 хвилин.");
         }
-        User user = userOptional.get();
-        String newPassword=request.getNewPassword();
-        user.setPassword(newPassword);
+        User user =userRepository.findByEmail(request.getEmail()).orElseThrow(()->{
+            auditService.log(ActionType.USER_AUTH_UPDATE_USER_NOT_FOUND,LevelLogin.ERROR,request.getEmail());
+            throw new UsernameNotFoundException("Користувача не знайдено");
+        });
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getOldPassword())
+            );
+        } catch (AuthenticationException e) {
+            auditService.log(ActionType.USER_AUTH_LOGIN_INCORRECT_PASSWORD, LevelLogin.ERROR,  request.getEmail());
+            loginAttemptService.loginFailed(ip);
+            throw new IllegalArgumentException("Невірні дані для зміни паролю");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+        loginAttemptService.loginSucceeded(ip);
         auditService.log(ActionType.USER_AUTH_UPDATE_USER_PASSWORD_UPDATE,LevelLogin.INFO,request.getEmail());
 
     }

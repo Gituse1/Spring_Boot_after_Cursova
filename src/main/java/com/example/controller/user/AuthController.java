@@ -2,7 +2,7 @@ package com.example.controller.user;
 
 import com.example.dto.Request.ChangePasswordRequest;
 import com.example.dto.Request.LoginRequest;
-import com.example.dto.Request.RegisterRequest; // Імпорт нового DTO
+import com.example.dto.Request.RegisterRequest;
 import com.example.dto.Response.UserResponse;
 import com.example.service.user.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,11 +50,11 @@ public class AuthController {
 
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(
-            Authentication authentication,
-            @RequestBody @Valid ChangePasswordRequest request
+            @RequestBody @Valid ChangePasswordRequest request,
+            HttpServletRequest httpServletRequest
     ) {
         // authentication.getName() поверне email із токена
-        authService.updateUserPassword(request);
+        authService.updateUserPassword(request,httpServletRequest.getRemoteAddr() );
 
         return ResponseEntity.ok().build();
     }

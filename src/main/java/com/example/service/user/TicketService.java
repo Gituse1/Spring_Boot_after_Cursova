@@ -1,12 +1,10 @@
 package com.example.service.user;
 
 import com.example.dto.Request.TicketRequest;
+import com.example.dto.Response.TicketStatusResponse;
 import com.example.dto.Response.TicketResponse;
 import com.example.model.*;
-import com.example.repository.RoutePointRepository;
-import com.example.repository.TicketRepository;
-import com.example.repository.TripRepository;
-import com.example.repository.UserRepository;
+import com.example.repository.*;
 import com.example.service.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.OptionalLong;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +24,7 @@ public class TicketService  {
     private final UserRepository userRepository;
     private final RoutePointRepository routePointRepository;
     private final AuditService auditService;
+    private final TicketStatusRepository ticketStatusRepository;
 
     @Transactional
     public void buyTicket(TicketRequest request, String email){
@@ -61,10 +58,8 @@ public class TicketService  {
         if (ticketPrice <= 0) {
             throw new IllegalArgumentException("Помилка розрахунку ціни: перевірте дані маршруту.");
         }
-
-
+        // Якщо виникне помилка тоді всі функції вище по виклику закінчать свою роботу
        isValidData(request,startPoint,endPoint,trip);
-
 
             Ticket ticket = Ticket.builder()
                     .trip(trip)
@@ -74,8 +69,12 @@ public class TicketService  {
                     .seatNumber(request.getSeatNumber())
                     .price(ticketPrice)
                     .build();
+           Ticket newTicket= ticketRepository.save(ticket);
 
-            ticketRepository.save(ticket);
+           TicketStatusResponse ticketStatus= TicketStatusResponse
+                   .builder()
+                   .id(newTicket.getIdTicket())
+                   .status("RESERVED").build();
             auditService.log(ActionType.USER_TICKET_BUY_TICKET_CREATED, LevelLogin.INFO,email);
             
 

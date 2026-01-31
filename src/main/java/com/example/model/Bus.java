@@ -13,7 +13,7 @@ public class Bus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_bus")
+    @Column(name = "id")
     private Long idBus;
 
     @Column(name = "total_seats")

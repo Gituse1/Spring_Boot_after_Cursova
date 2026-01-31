@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_trip")
+    @Column(name = "id")
     private Long  idTrip;
 
     @ManyToOne

@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface TicketRepository extends JpaRepository<Ticket,Long> {
 
     @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END " +
-            "FROM Ticket t WHERE t.trip.idTrip = :tripId " +
+            "FROM TicketStatus t WHERE t.trip.idTrip = :tripId " +
             "AND t.seatNumber = :seatNumber")
     boolean checkSeatIsTaken(@Param("tripId") Long tripId,
                              @Param("seatNumber") int seatNumber);
@@ -44,5 +44,6 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
+
 
 }

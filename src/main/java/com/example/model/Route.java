@@ -16,7 +16,7 @@ public class Route {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_route")
+    @Column(name = "id")
     private Long idRoute;
 
     @Column(name = "name_route")

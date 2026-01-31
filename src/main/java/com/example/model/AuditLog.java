@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_audit_log")
+    @Column(name = "id")
     private Long idAuditLog;
 
 

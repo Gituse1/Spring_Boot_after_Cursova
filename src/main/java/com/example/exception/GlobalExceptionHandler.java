@@ -25,13 +25,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
-    // Ловимо все інше (500)
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGlobalException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Сталася помилка сервера: " + e.getMessage());
-    }
-
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<String> handleForbidden(SecurityException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -47,6 +40,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleForbidden(BadCredentialsException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+    // Ловимо все інше (500)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGlobalException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Сталася помилка сервера: " + e.getMessage());
     }
 
 }

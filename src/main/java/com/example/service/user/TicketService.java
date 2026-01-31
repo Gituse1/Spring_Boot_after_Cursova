@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 
 @Service
@@ -56,8 +57,12 @@ public class TicketService  {
         int ticketPrice = (int) (endPoint.getPrice() - startPoint.getPrice());
 
         if (ticketPrice <= 0) {
-            throw new IllegalArgumentException("Помилка розрахунку ціни: перевірте дані маршруту.");
+            throw new IllegalArgumentException(" Перевірте дані маршруту бо вони розташовані не в правильному порядку.");
         }
+        if(LocalDateTime.now().isAfter( trip.getDepartureTime())){
+            throw new IllegalArgumentException("час відправлення минув,Забронювати квиток неможливо");
+        }
+
         // Якщо виникне помилка тоді всі функції вище по виклику закінчать свою роботу
        isValidData(request,startPoint,endPoint,trip);
 

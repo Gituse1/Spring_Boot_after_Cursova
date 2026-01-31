@@ -1,0 +1,736 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Bus Booking System API",
+    "description": "Єдина документація для системи бронювання квитків. Включає авторизацію та роботу з містами.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Локальний сервер"
+    }
+  ],
+  "tags": [
+    { "name": "Authorization", "description": "Вхід, реєстрація та зміна пароля" },
+    { "name": "Cities", "description": "Керування списком міст" },
+    { "name": "Tickets", "description": "Бронювання квитків та перегляд куплених місць" },
+    { "name": "Trips", "description": "Пошук та перегляд рейсів для бронювання"},
+    { "name": "Admin: Audit", "description": "Адміністративні інструменти для перегляду логів аудиту та дій користувачів."},
+    { "name": "Admin: Buses", "description": "Адміністративні операції для керування автобусами: додавання, видалення та редагування характеристик."},
+    { "name": "Admin: Cities", "description": "Адміністративні операції для створення, видалення та редагування міст."},
+    { "name": "Admin: Routes", "description": "Адміністративні операції для керування маршрутами (зв'язки між містами та відстані)."},
+    { "name": "Admin: Trips", "description": "Адміністративні операції для планування та створення нових рейсів."},
+    { "name": "Admin: Users", "description": "Адміністративні операції для керування користувачами системи: перегляд списку, редагування даних та видалення акаунтів."
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Authorization"],
+        "summary": "Реєстрація",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/RegisterRequest" } }
+          }
+        },
+        "responses": { "200": { "description": "Успіх" } }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Authorization"],
+        "summary": "Логін",
+        "description": "Працює захист від Brute Force (Caffeine Cache).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Повертає JWT токен" },
+          "429": { "description": "Забагато спроб (IP заблоковано)" }
+        }
+      }
+    },
+    "/api/auth/user": {
+      "get": {
+        "tags": ["Authorization"],
+        "summary": "Дані поточного користувача",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserResponse" } }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/password": {
+      "put": {
+        "tags": ["Authorization"],
+        "summary": "Зміна пароля",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ChangePasswordRequest" } }
+          }
+        },
+        "responses": { "200": { "description": "Пароль оновлено" } }
+      }
+    },
+    "/api/cities": {
+      "get": {
+        "tags": ["Cities"],
+        "summary": "Список усіх міст",
+        "responses": {
+          "200": {
+            "description": "Масив міст",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/City" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tickets": {
+      "post": {
+        "tags": ["Tickets"],
+        "summary": "Купити квиток",
+        "description": "Створює бронювання для поточного авторизованого користувача.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/TicketRequest" } }
+          }
+        },
+        "responses": { "200": { "description": "Квиток успішно куплено" } }
+      }
+    },
+    "/api/tickets/trip/{tripId}/occupied-seats": {
+      "get": {
+        "tags": ["Tickets"],
+        "summary": "Список зайнятих місць на рейс",
+        "parameters": [
+          {
+            "name": "tripId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список номерів місць",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tickets/my": {
+      "get": {
+        "tags": ["Tickets"],
+        "summary": "Мої квитки",
+        "description": "Повертає список усіх квитків авторизованого користувача.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TicketResponse" } }
+              }
+            },
+            "description": "Повертає історію всіх квитків авторизованого користувача. Дані витягуються за email-адресою, яка закодована в JWT токені."
+          }
+        }
+      }
+    },
+    "/api/tickets/{name}/{seatNumber}": {
+      "delete": {
+        "tags": ["Tickets"],
+        "summary": "Скасувати бронювання",
+        "parameters": [
+          { "name": "name", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "seatNumber", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "204": { "description": "Квиток видалено" } }
+      }
+    },
+    "/api/trips": {
+      "get": {
+        "tags": ["Trips"],
+        "summary": "Отримати всі доступні рейси",
+        "description": "Повертає повний список усіх рейсів у системі без фільтрації.",
+        "responses": {
+          "200": {
+            "description": "Список рейсів успішно отримано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Trip" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trips/search": {
+      "get": {
+        "tags": ["Trips"],
+        "summary": "Пошук рейсів за фільтрами",
+        "description": "Дозволяє знайти рейси між конкретними містами на певну дату. Усі параметри є необов'язковими.",
+        "parameters": [
+          {
+            "name": "fromCityId",
+            "in": "query",
+            "required": false,
+            "description": "ID міста відправлення (Long).",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "toCityId",
+            "in": "query",
+            "required": false,
+            "description": "ID міста прибуття (Long).",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "Дата відправлення у форматі 'YYYY-MM-DD'.",
+            "schema": { "type": "string", "example": "2026-02-15" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результати пошуку рейсів",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Trip" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "put": {
+        "tags": ["Authorization"],
+        "summary": "Оновлення профілю користувача",
+        "description": "Дозволяє змінити ім'я або інші дані профілю. Email береться автоматично з JWT токена.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProfileRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Профіль успішно оновлено" },
+          "401": { "description": "Користувач не авторизований" },
+          "400": { "description": "Помилка валідації даних" }
+        }
+      }
+    },
+    "/api/admin/audit-logs": {
+      "get": {
+        "tags": ["Admin: Audit"],
+        "summary": "Отримати всі логи аудиту",
+        "description": "Повертає повну історію всіх подій у системі (авторизації, помилки, дії). Доступно тільки для ролі ADMIN.",
+        "responses": {
+          "200": {
+            "description": "Список логів отримано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/AuditLog" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/audit-logs/user/{userId}": {
+      "get": {
+        "tags": ["Admin: Audit"],
+        "summary": "Логи конкретного користувача",
+        "description": "Фільтрує події аудиту за унікальним ідентифікатором користувача.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "ID користувача для фільтрації",
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Логи користувача отримано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/AuditLog" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/bus": {
+      "get": {
+        "tags": ["Admin: Buses"],
+        "summary": "Список усіх автобусів (Адмін)",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Bus" } } }
+            },
+            "description": "   "
+          }
+        }
+      },
+      "put": {
+        "tags": ["Admin: Buses"],
+        "summary": "Створити новий автобус",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Bus" } } }
+        },
+        "responses": { "201": { "description": "Автобус створено" } }
+      },
+      "delete": {
+        "tags": ["Admin: Buses"],
+        "summary": "Видалити автобус",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "integer", "format": "int64", "example": 1 } } }
+        },
+        "responses": { "204": { "description": "Видалено" } }
+      }
+    },
+    "/api/admin/bus/{id}": {
+      "put": {
+        "tags": ["Admin: Buses"],
+        "summary": "Повне оновлення даних автобуса",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int64" } }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Bus" } } }
+        },
+        "responses": { "200": { "description": "Оновлено" } }
+      },
+      "patch": {
+        "tags": ["Admin: Buses"],
+        "summary": "Часткове оновлення (наприклад, кількість місць)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int64" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "additionalProperties": { "type": "integer" } },
+              "example": { "totalSeats": 45 }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Місткість змінена" } }
+      }
+    },
+    "/api/admin/cities": {
+      "post": {
+        "tags": ["Admin: Cities"],
+        "summary": "Додати нове місто",
+        "description": "Створює новий запис міста в базі даних. Використовується адміністратором для розширення географії маршрутів. На вхід очікується JSON-об'єкт із назвою міста. Метод повертає створений об'єкт із автоматично згенерованим ID.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/City" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Місто успішно створено та збережено в базі" }
+        }
+      },
+      "get": {
+        "tags": ["Admin: Cities"],
+        "summary": "Отримати всі міста (для адмін-панелі)",
+        "description": "Повертає повний список об'єктів міст. На відміну від користувацького інтерфейсу, цей метод може використовуватися в адмінці для редагування або видалення записів.",
+        "responses": {
+          "200": {
+            "description": "Список усіх міст отримано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/City" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin: Cities"],
+        "summary": "Видалити місто",
+        "description": "Видаляє місто за його унікальним ідентифікатором (Long). **Важливо:** Перед видаленням бекенд має перевірити, чи не існують рейси (Trips), які використовують це місто, щоб уникнути помилок цілісності даних.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Унікальний ID міста, яке потрібно видалити",
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Місто успішно видалено з системи" }
+        }
+      }
+    },
+    "/api/admin/cities/{id}": {
+      "put": {
+        "tags": ["Admin: Cities"],
+        "summary": "Повне оновлення міста",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int64" } }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/City" } } }
+        },
+        "responses": { "200": { "description": "Дані оновлено" } }
+      },
+      "patch": {
+        "tags": ["Admin: Cities"],
+        "summary": "Зміна назви міста",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int64" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "additionalProperties": { "type": "string" } },
+              "example": { "name": "Нова назва" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Назву змінено" } }
+      }
+    },
+    "/api/admin/routes": {
+      "get": {
+        "tags": ["Admin: Routes"],
+        "summary": "Отримати всі маршрути",
+        "description": "Повертає повний список маршрутів. Використовується в адмін-панелі (AdminPage.jsx) для відображення існуючих шляхів та їх редагування.",
+        "responses": {
+          "200": {
+            "description": "Список маршрутів успішно отримано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Route" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin: Routes"],
+        "summary": "Створити новий маршрут",
+        "description": "Зберігає новий маршрут у базі даних. Очікує об'єкт із посиланнями на міста (ID міст) та додаткові характеристики, як-от відстань чи час у дорозі.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Route" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Маршрут успішно створено",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Route" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/trip": {
+      "post": {
+        "tags": ["Admin: Trips"],
+        "summary": "Створити новий рейс",
+        "description": "Метод дозволяє адміністратору запланувати новий рейс, призначивши конкретний автобус на певний маршрут із вказанням часу та вартості. На вхід очікується об'єкт TripRequest, який містить ID автобуса, ID маршруту та дату/час.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TripRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Рейс успішно створено та додано в розклад",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Trip" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/user": {
+      "get": {
+        "tags": ["Admin: Users"],
+        "summary": "Список усіх користувачів",
+        "description": "Повертає повний список користувачів системи для адміністратора. Використовується для моніторингу активних акаунтів.",
+        "responses": {
+          "200": {
+            "description": "Список користувачів успішно отримано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserResponse" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/user/{id}": {
+      "delete": {
+        "tags": ["Admin: Users"],
+        "summary": "Видалити користувача",
+        "description": "Повне видалення облікового запису користувача за його ID. Ця дія є незворотною.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID користувача, якого потрібно видалити",
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Користувача успішно видалено (No Content)" }
+        }
+      },
+      "put": {
+        "tags": ["Admin: Users"],
+        "summary": "Оновити дані користувача",
+        "description": "Дозволяє адміністратору змінити інформацію про користувача (ім'я, роль тощо) за його ідентифікатором.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserResponse" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Дані користувача оновлено",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "email": { "type": "string" }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "oldPassword": { "type": "string" },
+          "newPassword": { "type": "string" }
+        }
+      },
+      "City": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" }
+        }
+      },
+      "TicketRequest": {
+        "type": "object",
+        "properties": {
+          "tripId": { "type": "integer", "format": "int64" },
+          "seatNumber": { "type": "string" }
+        }
+      },
+      "TicketResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "busPlateNumber": { "type": "string" },
+          "departureTime": { "type": "string", "format": "date-time" },
+          "seatNumber": { "type": "string" }
+        }
+      },
+      "Trip": {
+        "type": "object",
+        "description": "Інформація про конкретний рейс",
+        "properties": {
+          "id": { "type": "integer", "format": "int64", "example": 101 },
+          "bus": { "$ref": "#/components/schemas/Bus" },
+          "departureCity": { "$ref": "#/components/schemas/City" },
+          "arrivalCity": { "$ref": "#/components/schemas/City" },
+          "departureTime": { "type": "string", "format": "date-time", "description": "Дата та час виїзду" },
+          "price": { "type": "number", "format": "double", "example": 450.50 }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Нове ім'я користувача",
+            "example": "Олександр Іванов"
+          }
+        }
+      },
+      "Bus": {
+        "type": "object",
+        "description": "Інформація про автобус, задіяний у рейсі",
+        "properties": {
+          "idBus": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Унікальний ідентифікатор автобуса (Long/BIGINT у базі даних)",
+            "example": 1
+          },
+          "totalSeats": {
+            "type": "integer",
+            "description": "Загальна кількість місць в автобусі",
+            "example": 50
+          },
+          "plateNumber": {
+            "type": "string",
+            "description": "Державний номерний знак транспортного засобу",
+            "example": "AA 7777 BB"
+          }
+        }
+      },
+      "AuditLog": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "userId": { "type": "integer", "format": "int64" },
+          "action": { "type": "string", "example": "LOGIN_SUCCESS" },
+          "details": { "type": "string", "example": "User logged in from IP 192.168.1.1" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Route": {
+        "type": "object",
+        "description": "Об'єкт маршруту, що з'єднує два міста",
+        "properties": {
+          "id": { "type": "integer", "format": "int64", "example": 10 },
+          "departureCity": { "$ref": "#/components/schemas/City" },
+          "arrivalCity": { "$ref": "#/components/schemas/City" },
+          "distance": { "type": "number", "format": "double", "description": "Відстань між містами в кілометрах", "example": 150.5 }
+        }
+      },
+      "TripRequest": {
+        "type": "object",
+        "description": "Дані для створення нового рейсу",
+        "required": ["busId", "routeId", "departureTime", "price"],
+        "properties": {
+          "busId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID автобуса з бази даних",
+            "example": 5
+          },
+          "routeId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID маршруту (Route)",
+            "example": 12
+          },
+          "departureTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата та час відправлення (ISO 8601)",
+            "example": "2026-03-01T10:00:00"
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "description": "Вартість квитка",
+            "example": 550.0
+          }
+        }
+      }
+    }
+  }
+}

@@ -15,11 +15,14 @@ import java.util.Optional;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket,Long> {
 
-    @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END " +
-            "FROM TicketStatus t WHERE t.trip.idTrip = :tripId " +
-            "AND t.seatNumber = :seatNumber")
+    @Query("""
+    SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END 
+    FROM Ticket t 
+    WHERE t.trip.idTrip = :tripId 
+    AND t.seatNumber = :seatNumber
+""")
     boolean checkSeatIsTaken(@Param("tripId") Long tripId,
-                             @Param("seatNumber") int seatNumber);
+                             @Param("seatNumber") String seatNumber);
 
     @Query("SELECT t.seatNumber FROM Ticket t WHERE t.trip.idTrip = :tripId")
     List<String> findTakenSeatsByTripId(@Param("tripId") Long tripId);

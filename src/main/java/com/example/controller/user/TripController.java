@@ -21,11 +21,6 @@ public class TripController {
         return ResponseEntity.ok(tripService.getAllTrips());
     }
 
-//    @PostMapping
-//    public ResponseEntity<Trip> createTrip(@RequestBody TripRequest tripRequest) {
-//        Trip newTrip = tripService.createTrip(tripRequest);
-//        return ResponseEntity.ok(newTrip);
-//    }
 
     @GetMapping("/search")
     public ResponseEntity<List<Trip>> searchTrips(

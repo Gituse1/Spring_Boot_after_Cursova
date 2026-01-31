@@ -50,9 +50,7 @@ public class AuthController {
 
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(
-            @RequestBody @Valid ChangePasswordRequest request,
-            HttpServletRequest httpServletRequest
-    ) {
+            @RequestBody @Valid ChangePasswordRequest request, HttpServletRequest httpServletRequest) {
         // authentication.getName() поверне email із токена
         authService.updateUserPassword(request,httpServletRequest.getRemoteAddr() );
 

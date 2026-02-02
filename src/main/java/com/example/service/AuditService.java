@@ -43,5 +43,4 @@ public class AuditService {
     public void log(ActionType action,LevelLogin levelLogin){
        log(action ,levelLogin ,null);
     }
-//String event
 }

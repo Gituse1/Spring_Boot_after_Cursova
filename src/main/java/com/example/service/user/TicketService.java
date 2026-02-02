@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,6 +30,7 @@ public class TicketService  {
     private final AuditService auditService;
 
     private final TicketMapper ticketMapper;
+    private final AuthService authService;
 
 
     //Змінити логіку щоб перед бронюванням нового ми перевіряли чи квиток не є цим користвувачем заброньований
@@ -141,8 +143,10 @@ public class TicketService  {
     }
 
     //Змінити щоб можна було розрізнити квитки які вже заброньовані користувачем а які іншими користувачами (Map)
-    public List<Integer> getTakenSeats(Long tripId) {
-        return ticketRepository.findTakenSeatsByTripId(tripId);
+    public Map<Integer, String> getTakenSeats(Long tripId) {
+        String currentUserEmail = authService.getCurrentUserEmail();
+        List<Object[]> takenSeats= ticketRepository.findSeatsWithEmailsRaw(tripId);
+        return ticketMapper.ticketToMap(takenSeats,currentUserEmail);
     }
 
     public List<TicketResponse> findTicketsByUserEmail(String email) {

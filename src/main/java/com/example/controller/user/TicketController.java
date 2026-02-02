@@ -3,6 +3,7 @@ package com.example.controller.user;
 import com.example.dto.Request.TicketRequest;
 import com.example.dto.Response.TicketResponse;
 import com.example.service.user.TicketService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -32,8 +34,8 @@ public class TicketController {
     }
 
     @GetMapping("/trip/{tripId}/occupied-seats")
-    public ResponseEntity<List<Integer>> getOccupiedSeats(@PathVariable Long tripId) {
-        List<Integer> occupiedSeats = ticketService.getTakenSeats(tripId);
+    public ResponseEntity<Map<Integer,String>> getOccupiedSeats(@PathVariable Long tripId) {
+        Map<Integer,String> occupiedSeats = ticketService.getTakenSeats(tripId);
         return ResponseEntity.ok(occupiedSeats);
     }
 

@@ -2,6 +2,7 @@ package com.example.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "Ticket_Status")
 public class TicketStatus {
 
@@ -17,11 +19,12 @@ public class TicketStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTicket;
 
-    @Column(name = "name_status",nullable = false)
-    private String nameStatus;
 
     @ManyToOne
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
+
+    @Enumerated(EnumType.STRING)
+    private TicketStatusEnum status = TicketStatusEnum.ACTIVE;
 
 }

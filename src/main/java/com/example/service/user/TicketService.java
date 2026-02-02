@@ -1,7 +1,6 @@
 package com.example.service.user;
 
 import com.example.dto.Request.TicketRequest;
-import com.example.dto.Response.TicketStatusResponse;
 import com.example.dto.Response.TicketResponse;
 import com.example.model.*;
 import com.example.repository.*;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,6 +25,8 @@ public class TicketService  {
     private final AuditService auditService;
     private final TicketStatusRepository ticketStatusRepository;
 
+
+    //Змінити логіку щоб перед бронюванням нового ми перевіряли чи квиток не є цим користвувачем заброньований
     @Transactional
     public void buyTicket(TicketRequest request, String email){
 
@@ -66,6 +66,7 @@ public class TicketService  {
         // Якщо виникне помилка тоді всі функції вище по виклику закінчать свою роботу
        isValidData(request,startPoint,endPoint,trip);
 
+
             Ticket ticket = Ticket.builder()
                     .trip(trip)
                     .user(user)
@@ -74,12 +75,13 @@ public class TicketService  {
                     .seatNumber(request.getSeatNumber())
                     .price(ticketPrice)
                     .build();
-           Ticket newTicket= ticketRepository.save(ticket);
+            ticketRepository.save(ticket);
 
-           TicketStatusResponse ticketStatus= TicketStatusResponse
+           TicketStatus ticketStatus = TicketStatus
                    .builder()
-                   .id(newTicket.getIdTicket())
-                   .status("RESERVED").build();
+                   .ticket(ticket)
+                   .build();
+           ticketStatusRepository.save(ticketStatus);
             auditService.log(ActionType.USER_TICKET_BUY_TICKET_CREATED, LevelLogin.INFO,email);
             
 
@@ -117,7 +119,8 @@ public class TicketService  {
 
     }
 
-    public List<String> getTakenSeats(Long tripId) {
+    //Змінити щоб можна було розрізнити квитки які вже заброньовані користувачем а які іншими користувачами (Map)
+    public List<Integer> getTakenSeats(Long tripId) {
         return ticketRepository.findTakenSeatsByTripId(tripId);
     }
 
@@ -138,12 +141,21 @@ public class TicketService  {
 
         Long ticketId = ticketRepository.findIdByDetailsAndTime(email, seatNumber, startTime, endTime)
                 .orElseThrow(() -> {
-                    auditService.log(ActionType.USER_TICKET_DELETE_TICKET_TICKET_NOT_FOUND, LevelLogin.ERROR, email);
+                    auditService.log(ActionType.USER_TICKET_CANCELLED_TICKET_TICKET_NOT_FOUND, LevelLogin.ERROR, email);
                     return new EntityNotFoundException("Квиток не знайдено, видалення неможливе");
                 });
 
-        ticketRepository.deleteById(ticketId);
-        auditService.log(ActionType.USER_TICKET_DELETE_TICKET_TICKET_DELETED,LevelLogin.INFO);
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(()-> new EntityNotFoundException("Ticket not found"));
+
+        TicketStatus ticketStatus = TicketStatus
+                .builder()
+                .ticket(ticket)
+                .status(TicketStatusEnum.CANCELLED)
+                .build();
+
+        ticketStatusRepository.save(ticketStatus);
+        auditService.log(ActionType.USER_TICKET_CANCELLED_TICKET_TICKET_DELETED,LevelLogin.INFO);
 
 
     }

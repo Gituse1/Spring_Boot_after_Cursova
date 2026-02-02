@@ -3,7 +3,9 @@ package com.example.service.admin;
 import com.example.model.ActionType;
 import com.example.model.Admin;
 import com.example.model.LevelLogin;
+import com.example.model.User;
 import com.example.repository.AdminRepository;
+import com.example.repository.UserRepository;
 import com.example.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminUserService {
 
+    private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final AuditService auditService;
 
@@ -40,8 +43,8 @@ public class AdminUserService {
         auditService.log(ActionType.ADMIN_USER_DELETE_USER_DELETED,LevelLogin.INFO);
     }
 
-    public List<Admin> getUsers(){
-        return adminRepository.findAll();
+    public List<User> getUsers(){
+        return userRepository.findAll();
     }
 
 

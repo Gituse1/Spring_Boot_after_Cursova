@@ -20,7 +20,10 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping
-    public ResponseEntity<?> buyTicket(@RequestBody TicketRequest ticketRequest, Authentication authentication,Principal principal) {
+    public ResponseEntity<?> buyTicket(
+            @RequestBody TicketRequest ticketRequest,
+            Authentication authentication,
+            Principal principal) {
 
         String currentUserEmail = principal.getName();
        ticketService.buyTicket(ticketRequest, currentUserEmail);
@@ -29,8 +32,8 @@ public class TicketController {
     }
 
     @GetMapping("/trip/{tripId}/occupied-seats")
-    public ResponseEntity<List<String>> getOccupiedSeats(@PathVariable Long tripId) {
-        List<String> occupiedSeats = ticketService.getTakenSeats(tripId);
+    public ResponseEntity<List<Integer>> getOccupiedSeats(@PathVariable Long tripId) {
+        List<Integer> occupiedSeats = ticketService.getTakenSeats(tripId);
         return ResponseEntity.ok(occupiedSeats);
     }
 
@@ -43,16 +46,14 @@ public class TicketController {
 
     }
 
-//    @DeleteMapping("/<id>")
-//    public ResponseEntity<?> deleteTicket(@PathVariable long id,Principal principal){
-//
-//            ticketService.deleteTicket(id);
-//            return ResponseEntity.noContent().build();
-//
-//    }
 
     @DeleteMapping("/{name}/{seatNumber}")
-    public ResponseEntity<?> deleteTicket(@PathVariable String name, @PathVariable int seatNumber, Principal principal, LocalDateTime startTime, LocalDateTime endTime) {
+    public ResponseEntity<?> deleteTicket(
+            @PathVariable String name,
+            @PathVariable int seatNumber,
+            Principal principal,
+            LocalDateTime startTime,
+            LocalDateTime endTime) {
 
             ticketService.deleteTicket( seatNumber,startTime,endTime, principal);
             return ResponseEntity.noContent().build();

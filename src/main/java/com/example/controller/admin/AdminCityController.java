@@ -45,20 +45,13 @@ public class AdminCityController {
 
     //  Оновити місто (PUT)
     @PutMapping("/{id}")
-    public ResponseEntity<City> updateCity(@PathVariable Long id, @RequestBody City cityDetails) {
+    public ResponseEntity<City> updateCity(@PathVariable Long id,@RequestBody Map<String, String> updates) {
 
-        City updateCity = adminCityService.updateCity(id, cityDetails);
+        City updateCity = adminCityService.updateCity(id, updates);
         return ResponseEntity.ok(updateCity);
 
     }
 
-    @PatchMapping ("/{id}")
-    public ResponseEntity<City> updateCityName(@PathVariable Long id,@RequestBody Map<String, String> updates) {
-
-        City updateCity = adminCityService.updateCityName(id, updates);
-        return ResponseEntity.ok(updateCity);
-
-    }
 
 
 }

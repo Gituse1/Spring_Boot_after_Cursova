@@ -2,6 +2,7 @@ package com.example.controller.admin;
 
 
 import com.example.model.Admin;
+import com.example.model.User;
 import com.example.service.admin.AdminUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class AdminUserController {
   private final AdminUserService adminUserService;
 
     @GetMapping
-    public ResponseEntity<List<Admin>> getAllUser(){
+    public ResponseEntity<List<User>> getAllUser(){
 
         return ResponseEntity.ok(adminUserService.getUsers());
     }

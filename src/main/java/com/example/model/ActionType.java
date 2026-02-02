@@ -45,10 +45,10 @@ public enum ActionType {
     USER_TICKET_BUY_TICKET_POINT_NOT_FOUND("user_ticket_buy_ticket_point_not_found"),
     USER_TICKET_BUY_TICKET_TICKET_NOT_CREATED("user_ticket_buy_ticket_ticket_not_created"),
     USER_TICKET_BUY_TICKET_CREATED("user_ticket_buy_ticket_created"),
-    USER_TICKET_DELETE_TICKET_SEAT_NUMBER_NOT_FOUND("user_ticket_delete_ticket_seat_number_not_found"),
-    USER_TICKET_DELETE_TICKET_TICKET_NOT_FOUND("user_ticket_delete_ticket_ticket_not_found"),
-    USER_TICKET_DELETE_TICKET_SEAT_NUMBER_NOT_BELONG_USER("user_ticket_delete_ticket_seat_number_not_belong_user"),
-    USER_TICKET_DELETE_TICKET_TICKET_DELETED("user_ticket_delete_ticket_ticket_deleted"),
+    USER_TICKET_CANCELLED_TICKET_SEAT_NUMBER_NOT_FOUND("user_ticket_delete_ticket_seat_number_not_found"),
+    USER_TICKET_CANCELLED_TICKET_TICKET_NOT_FOUND("user_ticket_delete_ticket_ticket_not_found"),
+    USER_TICKET_CANCELLED_TICKET_SEAT_NUMBER_NOT_BELONG_USER("user_ticket_delete_ticket_seat_number_not_belong_user"),
+    USER_TICKET_CANCELLED_TICKET_TICKET_DELETED("user_ticket_delete_ticket_ticket_deleted"),
 
     // --- USER TRIP ACTIONS ---
     USER_TRIP_SEARCH_TRIP_DATE_NOT_VALID_FORMAT("user_trip_search_trip_date_not_valid_format"),

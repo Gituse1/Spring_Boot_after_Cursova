@@ -48,13 +48,13 @@ public class AdminCityService {
         cityRepository.deleteById(id);
     }
 
-    public City updateCity(Long id,  City cityDetails){
+    public City updateCity(Long id, Map<String, String> updates){
 
         try {
             City city = cityRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Місто не знайдено"));
 
-            city.setName(cityDetails.getName());
+            city.setName(updates.get("name"));
 
             auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_UPDATED,LevelLogin.INFO);
             return cityRepository.save(city);
@@ -66,23 +66,6 @@ public class AdminCityService {
         }
     }
 
-    public City updateCityName( Long id,  Map<String, String> updates){
-        String newName= updates.get("name");
-
-        if(newName==null || newName.isEmpty()){
-            auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_NAME_NOT_FOUND,LevelLogin.ERROR);
-            throw new NullPointerException();
-        }
-        City city = cityRepository.findById(id).orElseThrow(()->
-        {
-            auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_NAME_NOT_FOUND,LevelLogin.ERROR);
-            return new IllegalArgumentException("Місто не знайдено");
-        });
-
-        city.setName(newName);
-        auditService.log(ActionType.ADMIN_CITY_UPDATE_CITY_UPDATED,LevelLogin.INFO);
-        return cityRepository.save(city);
-    }
 
 
 

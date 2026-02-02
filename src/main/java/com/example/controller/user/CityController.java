@@ -1,4 +1,4 @@
-package com.example.controller.user; // Перевір назву пакету (у тебе було 'controler')
+package com.example.controller.user;
 
 import com.example.model.City;
 import com.example.repository.CityRepository;

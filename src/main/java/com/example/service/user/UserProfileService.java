@@ -8,6 +8,7 @@ import com.example.model.UserProfile;
 import com.example.repository.UserProfileRepository;
 import com.example.repository.UserRepository;
 import com.example.service.AuditService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,9 +20,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class UserProfileService {
-    private final UserProfileRepository profileRepository;
+    private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final AuthService authService;
 
     @Transactional
     public void updateProfile(String email, UpdateProfileRequest request) {
@@ -50,7 +52,7 @@ public class UserProfileService {
 
        updateProfileBio(profile,request,email);
 
-        profileRepository.save(profile);
+        userProfileRepository.save(profile);
     }
 
     private   void updateProfilePhoneNumber(UserProfile profile,UpdateProfileRequest request,String email){
@@ -79,5 +81,11 @@ public class UserProfileService {
             profile.setBio(request.getBio());
             auditService.log(ActionType.USER_USER_PROFILE_PROFILE_BIO_UPDATED, LevelLogin.INFO,email);
         }
+    }
+
+    public UserProfile getUserProfile(){
+        String email =authService.getCurrentUserEmail();
+        return userProfileRepository.findByUserEmail(email).orElseThrow(
+                ()-> new EntityNotFoundException("Data about user not found"));
     }
 }

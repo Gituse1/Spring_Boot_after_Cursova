@@ -1,6 +1,7 @@
 package com.example.controller.user;
 
 import com.example.dto.Request.UpdateProfileRequest;
+import com.example.model.UserProfile;
 import com.example.service.user.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/users")
 public class UserProfileController {
 
    private final UserProfileService userProfileService;
@@ -25,4 +27,8 @@ public class UserProfileController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserProfile> getUserDetails(){
+        return ResponseEntity.ok(userProfileService.getUserProfile());
+    }
 }

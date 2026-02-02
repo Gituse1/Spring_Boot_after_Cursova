@@ -24,4 +24,3 @@ Bean Lifecycle: Що відбувається між @PostConstruct та @PreDes
 Proxy: Як працює @Transactional під капотом? (Підказка: через динамічні проксі).
 Scopes: Чим Singleton відрізняється від Prototype і де їх використовувати?
 
-Переходжу покищо до іншого проекту.

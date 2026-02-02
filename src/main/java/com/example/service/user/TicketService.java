@@ -2,6 +2,7 @@ package com.example.service.user;
 
 import com.example.dto.Request.TicketRequest;
 import com.example.dto.Response.TicketResponse;
+import com.example.mapper.TicketMapper;
 import com.example.model.*;
 import com.example.repository.*;
 import com.example.service.AuditService;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +22,13 @@ public class TicketService  {
 
     private final TicketRepository ticketRepository;
     private final TripRepository tripRepository;
+    private final TicketStatusRepository ticketStatusRepository;
+
     private final UserRepository userRepository;
     private final RoutePointRepository routePointRepository;
     private final AuditService auditService;
-    private final TicketStatusRepository ticketStatusRepository;
+
+    private final TicketMapper ticketMapper;
 
 
     //Змінити логіку щоб перед бронюванням нового ми перевіряли чи квиток не є цим користвувачем заброньований
@@ -66,7 +71,22 @@ public class TicketService  {
         // Якщо виникне помилка тоді всі функції вище по виклику закінчать свою роботу
        isValidData(request,startPoint,endPoint,trip);
 
+        Optional<Ticket> ticketOptional=ticketRepository.findTicketByDetailsAndEmail(email
+                ,request.getSeatNumber()
+                ,startPoint.getArrivalTime()
+                ,endPoint.getArrivalTime());
 
+        if(ticketOptional.isPresent()) {
+
+            Ticket ticket = ticketOptional.get();
+            TicketStatus ticketStatus = ticketStatusRepository.
+                    findStatusByTicketIdAndEmail(ticket.getIdTicket(), email, request.getSeatNumber())
+                    .orElseThrow(() -> new EntityNotFoundException("Status not found"));
+            ticketStatus.setStatus(TicketStatusEnum.ACTIVE);
+            ticketStatusRepository.save(ticketStatus);
+
+        }
+        else {
             Ticket ticket = Ticket.builder()
                     .trip(trip)
                     .user(user)
@@ -77,13 +97,14 @@ public class TicketService  {
                     .build();
             ticketRepository.save(ticket);
 
-           TicketStatus ticketStatus = TicketStatus
-                   .builder()
-                   .ticket(ticket)
-                   .build();
-           ticketStatusRepository.save(ticketStatus);
+            TicketStatus ticketStatus = TicketStatus
+                    .builder()
+                    .ticket(ticket)
+                    .build();
+            ticketStatusRepository.save(ticketStatus);
             auditService.log(ActionType.USER_TICKET_BUY_TICKET_CREATED, LevelLogin.INFO,email);
-            
+
+        }
 
     }
 
@@ -129,7 +150,9 @@ public class TicketService  {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Користувача з email " + email + " не знайдено"));
 
-        return ticketRepository.findByUser(user);
+        List<Ticket> ticket= ticketRepository.findByUser(user);
+        return ticketMapper.toResponse(ticket);
+
     }
 
     public void deleteTicket( int seatNumber, LocalDateTime startTime,LocalDateTime endTime ,Principal principal){

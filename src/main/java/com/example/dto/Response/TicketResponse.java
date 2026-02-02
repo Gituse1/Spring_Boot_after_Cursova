@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TicketResponse {
 
-    private String name;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int seatNumber;

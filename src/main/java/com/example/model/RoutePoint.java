@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -37,10 +37,10 @@ public class RoutePoint {
     private Double price;
 
     @Column(name = "arrival_time")
-    private LocalTime arrivalTime;   // Коли автобус приїжджає сюди
+    private LocalDateTime arrivalTime;   // Коли автобус приїжджає сюди
 
     @Column(name = "departure_time")
-    private LocalTime departureTime; // Коли автобус їде звідси
+    private LocalDateTime departureTime; // Коли автобус їде звідси
 
 
     public Double getPrice() {

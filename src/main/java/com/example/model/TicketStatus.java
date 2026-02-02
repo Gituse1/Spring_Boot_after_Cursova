@@ -20,7 +20,7 @@ public class TicketStatus {
     private Long idTicket;
 
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 

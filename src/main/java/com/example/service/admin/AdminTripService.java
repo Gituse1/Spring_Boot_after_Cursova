@@ -8,6 +8,7 @@ import com.example.repository.TripRepository;
 import com.example.service.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.internal.constraintvalidators.bv.notempty.NotEmptyValidatorForArraysOfInt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,10 @@ public class AdminTripService {
 
     @Transactional
     public Trip createTrip(TripRequest request) {
+
+        if(request.getPrice()<=0){
+            throw  new  IllegalArgumentException("Prise must be more than 0");
+        }
 
         LocalTime startRange = LocalTime.from(request.getDepartureTime().minusHours(1));
         LocalTime endRange = LocalTime.from(request.getDepartureTime().plusHours(1));
@@ -60,6 +65,7 @@ public class AdminTripService {
                 .route(route)
                 .bus(bus)
                 .departureTime(request.getDepartureTime())
+                .price(request.getPrice())
                 .build();
 
         return tripRepository.save(trip);

@@ -14,4 +14,5 @@ public class TripRequest {
     private Long routeId;
     private Long busId;
     private LocalDateTime departureTime;
+    private Integer price;
 }

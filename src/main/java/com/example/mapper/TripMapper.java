@@ -21,7 +21,7 @@ public class TripMapper {
 
         response.setId(trip.getIdTrip());
         response.setDepartureTime(trip.getDepartureTime());
-
+        response.setPrice(trip.getPrice());
         List<RoutePoint> points = Optional.ofNullable(trip.getRoute())
                 .map(Route::getRoutePoints)
                 .orElse(Collections.emptyList());
@@ -30,6 +30,7 @@ public class TripMapper {
             response.setDepartureCity(points.get(0).getCity().getName());
             response.setArrivalCity(points.get(points.size() - 1).getCity().getName());
         }
+
 
         return response;
     }

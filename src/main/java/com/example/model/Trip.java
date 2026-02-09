@@ -30,4 +30,6 @@ public class Trip {
     @Column(name = "departure_time")
     private LocalDateTime departureTime;
 
+    private int price;
+
 }

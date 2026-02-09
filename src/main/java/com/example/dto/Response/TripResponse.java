@@ -10,5 +10,6 @@ public class TripResponse {
     private String departureCity;
     private String arrivalCity;
     private LocalDateTime departureTime;
+    private Integer price;
 
 }

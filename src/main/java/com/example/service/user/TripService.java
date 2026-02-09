@@ -1,12 +1,16 @@
 package com.example.service.user;
 
+import com.example.dto.Response.TripResponse;
+import com.example.mapper.TripMapper;
 import com.example.model.*;
 import com.example.repository.TripRepository;
 import com.example.service.AuditService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -17,10 +21,12 @@ public class TripService  {
 
     private final TripRepository tripRepository;
     private final AuditService auditService;
+    private final TripMapper tripMapper;
 
 
-    public List<Trip> getAllTrips() {
-        return tripRepository.findAll();
+    public Page<TripResponse> getAllTrips(Pageable pageable) {
+        return tripRepository.findAll(pageable)
+                .map(tripMapper::toResponse);
     }
 
     @Transactional

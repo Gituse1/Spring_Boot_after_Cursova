@@ -1,26 +1,27 @@
 package com.example.repository;
 
 import com.example.model.Trip;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TripRepository extends JpaRepository<Trip,Long> {
-    @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END " +
-            "FROM Trip t " +
-            "JOIN t.route r " +
-            "JOIN r.routePoints p " +
-            "WHERE t.bus.idBus = :busId " +
-            "AND p.arrivalTime > :newStartTime " +
-            "AND t.departureTime < :newEndTime")
+    @Query("""
+            SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END
+            FROM Trip t
+            JOIN t.route r JOIN r.routePoints p
+            WHERE t.bus.idBus = :busId
+            AND p.arrivalTime > :newStartTime
+            AND t.departureTime < :newEndTime
+            """)
     boolean checkBusIsBusy(@Param("busId") Long busId,
                            @Param("newStartTime") LocalTime newStartTime,
                            @Param("newEndTime") LocalTime newEndTime);
@@ -54,6 +55,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             @Param("startOrderIndex") long startOrderIndex,
             @Param("endOrderIndex") long endOrderIndex
     );
+    Page<Trip> findAll(Pageable pageable);
 
 
 

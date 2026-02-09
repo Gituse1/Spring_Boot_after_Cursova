@@ -32,7 +32,7 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<UserResponse> getCurrentUserDetails(Authentication authentication) {
+    public ResponseEntity<?> getCurrentUserDetails(Authentication authentication) {
 
         UserResponse newUser = authService.getCurrentUserDetails(authentication.getName());
         return ResponseEntity.ok(newUser);
@@ -49,7 +49,7 @@ public class AuthController {
 
 
     @PutMapping("/password")
-    public ResponseEntity<Void> changePassword(
+    public ResponseEntity<?> changePassword(
             @RequestBody @Valid ChangePasswordRequest request, HttpServletRequest httpServletRequest) {
         // authentication.getName() поверне email із токена
         authService.updateUserPassword(request,httpServletRequest.getRemoteAddr() );

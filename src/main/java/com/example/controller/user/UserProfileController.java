@@ -16,7 +16,7 @@ public class UserProfileController {
 
    private final UserProfileService userProfileService;
 
-    @PutMapping("/profile")
+    @PutMapping("/me/update")
     public ResponseEntity<Void> updateProfile(
             Authentication authentication,
             @RequestBody @Valid UpdateProfileRequest request) {

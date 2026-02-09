@@ -25,7 +25,7 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
                              @Param("seatNumber") String seatNumber);
 
     @Query("""
-        SELECT t.seatNumber, u.email 
+        SELECT t.seatNumber, u.email
         FROM Ticket t 
         JOIN t.user u 
         WHERE t.trip.idTrip = :tripId

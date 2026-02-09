@@ -15,12 +15,15 @@ public interface TicketStatusRepository extends JpaRepository<TicketStatus,Long>
         @Query("SELECT ts FROM TicketStatus ts WHERE ts.ticket.idTicket = :ticketId")
         Optional<List<TicketStatus>> findStatusByTicketId(@Param("ticketId") Long ticketId);
 
-    @Query("SELECT ts " +
-            "FROM TicketStatus ts " +
-            "WHERE ts.ticket.idTicket = :ticketId " +
-            "AND ts.ticket.user.email = :email " +
-            "AND ts.status =: CANCELLED" +
-            "AND ts.seatNumber =: seatNumber")
+    @Query("""
+        SELECT ts
+        FROM TicketStatus ts
+        JOIN ts.ticket t
+        WHERE ts.ticket.idTicket = :ticketId
+        AND ts.ticket.user.email = :email
+        AND ts.status = 'CANCELLED'
+        AND t.seatNumber = :seatNumber
+        """)
     Optional<TicketStatus> findStatusByTicketIdAndEmail(
             @Param("ticketId") Long ticketId,
             @Param("email") String email,

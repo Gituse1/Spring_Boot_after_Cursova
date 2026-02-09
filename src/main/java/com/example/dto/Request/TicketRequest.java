@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class TicketRequest {
     private Long tripId;
-   // private Long userId;
     private Long startPointId;
     private Long endPointId;
     private int seatNumber;

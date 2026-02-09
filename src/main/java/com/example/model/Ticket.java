@@ -49,7 +49,7 @@ public class Ticket {
 
     @JsonIgnore
     @OneToOne(mappedBy = "ticket",cascade = CascadeType.ALL)
-    private List<TicketStatus> statuses;
+    private TicketStatus statuses;
 
 
 }

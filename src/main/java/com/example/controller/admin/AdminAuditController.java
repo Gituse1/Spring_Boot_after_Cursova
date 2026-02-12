@@ -1,5 +1,6 @@
 package com.example.controller.admin;
 
+import com.example.dto.Response.AuditLogResponse;
 import com.example.model.AuditLog;
 import com.example.repository.AuditLogRepository;
 import com.example.service.admin.AdminAuditService;
@@ -22,9 +23,9 @@ public class AdminAuditController {
         return ResponseEntity.ok(auditLogRepository.findAll());
     }
     @GetMapping("user/{userId}")
-    public ResponseEntity<List<AuditLog>> getUserAuditLog(@PathVariable long userId){
+    public ResponseEntity<List<AuditLogResponse>> getUserAuditLog(@PathVariable long userId){
 
-        List<AuditLog> auditLogs = adminAuditService.getUserAuditLog(userId);
+        List<AuditLogResponse> auditLogs = adminAuditService.getUserAuditLog(userId);
         return ResponseEntity.ok(auditLogs);
 
     }

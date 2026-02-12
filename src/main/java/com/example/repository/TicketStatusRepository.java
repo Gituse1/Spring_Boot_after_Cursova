@@ -13,7 +13,7 @@ public interface TicketStatusRepository extends JpaRepository<TicketStatus,Long>
 
 
         @Query("SELECT ts FROM TicketStatus ts WHERE ts.ticket.idTicket = :ticketId")
-        Optional<List<TicketStatus>> findStatusByTicketId(@Param("ticketId") Long ticketId);
+        List<TicketStatus> findStatusByTicketId(@Param("ticketId") Long ticketId);
 
     @Query("""
         SELECT ts

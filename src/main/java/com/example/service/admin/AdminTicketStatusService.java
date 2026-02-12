@@ -1,9 +1,7 @@
 package com.example.service.admin;
 
-import com.example.dto.Response.TicketStatusResponse;
 import com.example.model.TicketStatus;
 import com.example.repository.TicketStatusRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,8 +22,7 @@ public class AdminTicketStatusService {
       }
 
       return ticketStatusRepository
-              .findStatusByTicketId(ticketStatusId)
-              .orElseThrow(()-> new EntityNotFoundException("TicketStatus Not Found"));
+              .findStatusByTicketId(ticketStatusId);
   }
 
 }

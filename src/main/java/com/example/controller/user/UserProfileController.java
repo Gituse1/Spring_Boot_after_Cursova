@@ -1,6 +1,7 @@
 package com.example.controller.user;
 
 import com.example.dto.Request.UpdateProfileRequest;
+import com.example.dto.Response.UserProfileResponse;
 import com.example.model.UserProfile;
 import com.example.service.user.UserProfileService;
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ public class UserProfileController {
    private final UserProfileService userProfileService;
 
     @PutMapping("/me/update")
-    public ResponseEntity<Void> updateProfile(
+    public ResponseEntity<?> updateProfile(
             Authentication authentication,
             @RequestBody @Valid UpdateProfileRequest request) {
 
@@ -28,7 +29,7 @@ public class UserProfileController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserProfile> getUserDetails(){
+    public ResponseEntity<UserProfileResponse> getUserDetails(){
         return ResponseEntity.ok(userProfileService.getUserProfile());
     }
 }

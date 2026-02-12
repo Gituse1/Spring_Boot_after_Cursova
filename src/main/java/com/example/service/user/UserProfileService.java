@@ -1,6 +1,8 @@
 package com.example.service.user;
 
 import com.example.dto.Request.UpdateProfileRequest;
+import com.example.dto.Response.UserProfileResponse;
+import com.example.mapper.UserProfileMapper;
 import com.example.model.ActionType;
 import com.example.model.LevelLogin;
 import com.example.model.User;
@@ -24,6 +26,7 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final AuditService auditService;
     private final AuthService authService;
+    private final UserProfileMapper userProfileMapper;
 
     @Transactional
     public void updateProfile(String email, UpdateProfileRequest request) {
@@ -83,9 +86,10 @@ public class UserProfileService {
         }
     }
 
-    public UserProfile getUserProfile(){
+    public UserProfileResponse getUserProfile(){
         String email =authService.getCurrentUserEmail();
-        return userProfileRepository.findByUserEmail(email).orElseThrow(
+        UserProfile  userProfile =userProfileRepository.findByUserEmail(email).orElseThrow(
                 ()-> new EntityNotFoundException("Data about user not found"));
+        return userProfileMapper.ToResponse(userProfile);
     }
 }

@@ -7,6 +7,7 @@ import com.example.model.User;
 import com.example.repository.AdminRepository;
 import com.example.repository.UserRepository;
 import com.example.service.AuditService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +45,11 @@ public class AdminUserService {
     }
 
     public List<User> getUsers(){
-        return userRepository.findAll();
+        List<User> userList =userRepository.findAllWithProfile();
+        if(userList == null){
+            throw  new EntityNotFoundException("Users Not Found");
+        }
+        return userList;
     }
 
 

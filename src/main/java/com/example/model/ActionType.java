@@ -59,7 +59,8 @@ public enum ActionType {
     USER_USER_PROFILE_UPDATE_PHONE_NUMBER_UPDATED("user_profile_update_phone_number_updated"),
     USER_USER_PROFILE_UPDATE_ADDRESS_UPDATED("user_profile_update_address_updated"),
     USER_USER_PROFILE_PROFILE_CITY_NUMBER_UPDATED("user_profile_update_city_updated"),
-    USER_USER_PROFILE_PROFILE_BIO_UPDATED("user_profile_update_bio_updated");
+    USER_USER_PROFILE_PROFILE_BIO_UPDATED("user_profile_update_bio_updated"),
+    USER_PROFILE_UPDATED("user_profile_updated");
 
     private final String code;
 

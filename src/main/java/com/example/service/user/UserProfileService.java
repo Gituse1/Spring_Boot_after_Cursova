@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.function.Consumer;
 
 
 @RequiredArgsConstructor
@@ -28,63 +28,46 @@ public class UserProfileService {
     private final AuthService authService;
     private final UserProfileMapper userProfileMapper;
 
+
+
     @Transactional
-    public void updateProfile(String email, UpdateProfileRequest request) {
+    public void updateProfile(String email, UpdateProfileRequest request){
+        User user = userRepository.findByEmail(email).
+                orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Optional<User> userOptional =userRepository.findByEmail(email);
+        UserProfile userProfile =(user.getUserProfile()!= null) ? user.getUserProfile() : createNewProfile(user);
 
-        if(userOptional.isEmpty()){
-            auditService.log(ActionType.USER_USER_PROFILE_UPDATE_PROFILES_INCORRECT_LOGIN,LevelLogin.ERROR,email);
-            throw  new UsernameNotFoundException("User not found");
-        }
-        User user = userOptional.get();
-        UserProfile profile = user.getUserProfile();
+        boolean isUpdated = applyChanges(userProfile, request);
 
-        if (profile == null) {
-            profile = new UserProfile();
-            profile.setUser(user);
-            user.setUserProfile(profile);
-
-        }
-
-       updateProfilePhoneNumber(profile,request,email);
-
-       updateProfileAddress(profile,request,email);
-
-       updateProfileCity(profile,request,email);
-
-       updateProfileBio(profile,request,email);
-
-        userProfileRepository.save(profile);
-    }
-
-    private   void updateProfilePhoneNumber(UserProfile profile,UpdateProfileRequest request,String email){
-        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
-            profile.setPhoneNumber(request.getPhoneNumber());
-            auditService.log(ActionType.USER_USER_PROFILE_UPDATE_PHONE_NUMBER_UPDATED,LevelLogin.INFO,email);
+        if (isUpdated) {
+            auditService.log(ActionType.USER_PROFILE_UPDATED, LevelLogin.INFO, email);
         }
     }
 
-    private   void updateProfileAddress(UserProfile profile,UpdateProfileRequest request,String email){
-        if (request.getAddress() != null && !request.getAddress().isBlank()) {
-            profile.setAddress(request.getAddress());
-            auditService.log(ActionType.USER_USER_PROFILE_UPDATE_ADDRESS_UPDATED,LevelLogin.INFO,email);
-        }
+    private UserProfile createNewProfile(User user){
+        return UserProfile.builder().user(user).build();
     }
-
-    private   void updateProfileCity(UserProfile profile,UpdateProfileRequest request,String email){
-        if (request.getCity() != null && !request.getCity().isBlank()) {
-            profile.setCity(request.getCity());
-            auditService.log(ActionType.USER_USER_PROFILE_PROFILE_CITY_NUMBER_UPDATED,LevelLogin.INFO,email);
-        }
-    }
-
-    private   void updateProfileBio(UserProfile profile,UpdateProfileRequest request,String email){
+    private boolean applyChanges(UserProfile userProfile,UpdateProfileRequest request){
+        boolean updated =false;
+        updated |= updateField(request.getPhoneNumber(),userProfile::setPhoneNumber);
+        updated |= updateField(request.getCity(),userProfile::setCity);
+        updated |= updateField(request.getAddress(), userProfile::setCity);
         if (request.getBio() != null) {
-            profile.setBio(request.getBio());
-            auditService.log(ActionType.USER_USER_PROFILE_PROFILE_BIO_UPDATED, LevelLogin.INFO,email);
+            userProfile.setBio(request.getBio());
+            updated = true;
         }
+        return updated;
+
     }
+    private boolean updateField(String newValue, Consumer<String> setter){
+        if(newValue != null && !newValue.isBlank()){
+            setter.accept(newValue);
+            return true;
+        }
+        return  false;
+    }
+
+
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(){
         String email =authService.getCurrentUserEmail();

@@ -11,7 +11,7 @@ import com.example.repository.UserProfileRepository;
 import com.example.repository.UserRepository;
 import com.example.service.AuditService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -85,7 +85,7 @@ public class UserProfileService {
             auditService.log(ActionType.USER_USER_PROFILE_PROFILE_BIO_UPDATED, LevelLogin.INFO,email);
         }
     }
-
+    @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(){
         String email =authService.getCurrentUserEmail();
         UserProfile  userProfile =userProfileRepository.findByUserEmail(email).orElseThrow(

@@ -5,6 +5,7 @@ import com.example.repository.TicketStatusRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class AdminTicketStatusService {
 
     private final TicketStatusRepository ticketStatusRepository;
 
+    @Transactional
   private List<TicketStatus> getTicketInfo(Long ticketStatusId){
 
       if(ticketStatusId<=0){

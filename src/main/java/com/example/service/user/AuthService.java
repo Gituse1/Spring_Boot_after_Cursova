@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -33,7 +34,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final LoginAttemptService loginAttemptService;
-
+    @Transactional
     public void registerUser( RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -47,7 +48,7 @@ public class AuthService {
         newUser.setPassword(encodedPassword);
         userRepository.save(newUser);
     }
-
+    @Transactional(readOnly = true)
     public UserResponse getCurrentUserDetails(String email) {
 
         User userOptional = userRepository.findByEmail(email).orElseThrow(()->{
@@ -62,6 +63,7 @@ public class AuthService {
         return user;
     }
 
+    @Transactional
     public String loginUser(LoginRequest request,String ip) {
 
         if (loginAttemptService.isBlocked(ip)) {
@@ -102,6 +104,7 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public void updateUserPassword(ChangePasswordRequest request,String ip){
         if (loginAttemptService.isBlocked(ip)) {
             throw new RuntimeException("Доступ заблоковано. Спробуйте через 15 хвилин.");

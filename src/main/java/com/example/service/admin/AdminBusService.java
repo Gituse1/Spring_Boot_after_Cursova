@@ -4,6 +4,7 @@ import com.example.model.Bus;
 import com.example.repository.BusRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -14,13 +15,14 @@ public class AdminBusService {
     private final BusRepository busRepository;
 
 
+    @Transactional
     public void deleteBus( long id){
         if(!busRepository.existsById(id) ){
             throw  new IllegalArgumentException("Автобус не знайдено");
         }
         busRepository.deleteById(id);
     }
-
+    @Transactional
     public Bus updateBus (long id, Bus newBus){
 
         if((newBus.getPlateNumber() == null) || newBus.getTotalSeats() == 0 ) {
@@ -36,7 +38,7 @@ public class AdminBusService {
         return busRepository.save(exitingBus);
 
     }
-
+    @Transactional
     public Bus updateBusCapacity( long id,  Map<String, Integer> updates){
         Integer newCapacity = updates.get("capacity");
 

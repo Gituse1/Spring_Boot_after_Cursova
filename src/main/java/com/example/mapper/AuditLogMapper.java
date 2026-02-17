@@ -3,10 +3,12 @@ package com.example.mapper;
 
 import com.example.dto.Response.AuditLogResponse;
 import com.example.model.AuditLog;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class AuditLogMapper {
 
     public List<AuditLogResponse> toResponse(List<AuditLog> auditLogList){

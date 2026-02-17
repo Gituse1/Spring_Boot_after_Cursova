@@ -6,6 +6,7 @@ import com.example.repository.TicketRepository;
 import com.example.service.AuditService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
@@ -16,7 +17,7 @@ public class AdminTicketService {
 
     private final TicketRepository ticketRepository;
     private final AuditService auditService;
-
+    @Transactional
     public void deleteTicket(@PathVariable long id, Principal principal){
         if(!ticketRepository.existsById(id)){
 

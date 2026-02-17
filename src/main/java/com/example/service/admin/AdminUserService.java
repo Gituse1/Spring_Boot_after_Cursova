@@ -10,6 +10,7 @@ import com.example.service.AuditService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class AdminUserService {
     private final AdminRepository adminRepository;
     private final AuditService auditService;
 
+    @Transactional
     public Admin updateUser(long id , Admin userDetails) {
         Admin user = adminRepository.findById(id)
                 .orElseThrow(() ->{
@@ -34,6 +36,7 @@ public class AdminUserService {
         return adminRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser( long id){
         if(!adminRepository.existsById(id)){
             auditService.log(ActionType.ADMIN_USER_DELETE_USER_NOT_FOUND,LevelLogin.ERROR);
@@ -44,6 +47,7 @@ public class AdminUserService {
         auditService.log(ActionType.ADMIN_USER_DELETE_USER_DELETED,LevelLogin.INFO);
     }
 
+    @Transactional(readOnly = true)
     public List<User> getUsers(){
         List<User> userList =userRepository.findAllWithProfile();
         if(userList == null){

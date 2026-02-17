@@ -9,6 +9,8 @@ AdminRouteController Додати можливість видалити напр
 
 Додати у AuditLogRepository ункцію для пошуку логів за користувачем з виправленням помилки N+1
 
+Створити ReadMyFile
+
 
 
 1. Integration Testing (Integration Tests)

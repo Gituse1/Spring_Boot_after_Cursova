@@ -142,7 +142,7 @@ public class TicketService  {
 
     }
 
-    //Змінити щоб можна було розрізнити квитки які вже заброньовані користувачем а які іншими користувачами (Map)
+    @Transactional(readOnly = true)
     public Map<Integer, String> getTakenSeats(Long tripId) {
         String currentUserEmail = authService.getCurrentUserEmail();
         List<Object[]> takenSeats= ticketRepository.findSeatsWithEmailsRaw(tripId);

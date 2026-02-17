@@ -16,7 +16,6 @@ import java.util.Map;
 public class AdminCityService {
 
     private final CityRepository cityRepository;
-
     private final AuditService auditService;
 
     public City createCity(String name) {

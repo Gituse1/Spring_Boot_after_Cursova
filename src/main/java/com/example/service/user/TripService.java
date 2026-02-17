@@ -23,13 +23,13 @@ public class TripService  {
     private final AuditService auditService;
     private final TripMapper tripMapper;
 
-
+    @Transactional(readOnly = true)
     public Page<TripResponse> getAllTrips(Pageable pageable) {
         return tripRepository.findAll(pageable)
                 .map(tripMapper::toResponse);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Trip> searchTrips(Long fromCityId, Long toCityId, String dateStr) {
 
         if (dateStr == null || dateStr.isEmpty()){

@@ -1,0 +1,139 @@
+package com.busBooking.service.user;
+
+import com.busBooking.dto.Request.LoginRequest;
+import com.busBooking.dto.Request.RegisterRequest;
+import com.busBooking.dto.Response.UserResponse;
+import com.busBooking.mapper.UserMapper;
+import com.busBooking.model.User;
+import com.busBooking.repository.UserRepository;
+import com.busBooking.service.AuditService;
+import com.busBooking.service.JwtService;
+import com.busBooking.service.LoginAttemptService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+
+    @Mock
+    private AuditService auditService;
+
+    @Mock
+    private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private LoginAttemptService loginAttemptService;
+
+
+    @InjectMocks
+    private  AuthService authService;
+
+    @BeforeEach
+    public void before(){
+
+        lenient().doNothing().when(auditService).log(any(),any());
+        lenient().doNothing().when(auditService).log(any(),any(),anyString());
+    }
+
+    @Test
+    public void registerUser_ShouldRegister_WhenDataIsValid(){
+
+        String testEmail ="test@gmail.com";
+        String testPassword ="125wdw";
+        String testName ="TestName";
+        String password="NotValidData";
+
+        RegisterRequest request=RegisterRequest
+                .builder().password(testPassword)
+                .email(testEmail).name(testName).build();
+
+        User testNewUser =  User.builder().password(testPassword).build();
+
+        when(userMapper.toEntity(request)).thenReturn(testNewUser);
+        when(passwordEncoder.encode(testPassword)).thenReturn(password);
+
+        authService.registerUser(request);
+
+        verify(userRepository).save(any(User.class));
+
+    }
+
+    @Test
+    public void getCurrentUserDetails_GetUserDetails_WhenDataIsValid(){
+
+        String testEmail ="test@gmail.com";
+        String testName ="TestName";
+
+        User user =User.builder().email(testEmail).name(testName).build();
+        UserResponse userResponse=UserResponse.builder().name(testName).email(testEmail).build();
+
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.ofNullable(user));
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+
+        authService.getCurrentUserDetails(testEmail);
+
+        verify(userRepository).findByEmail(testEmail);
+        verify(userMapper).toResponse(user);
+    }
+
+
+    @Test
+    public void loginUser_GetToken_WhenDataIsValid(){
+        String testEmail ="test@gmail.com";
+        String testPassword ="125wdw";
+        String expectedToken = "valid.jwt.token";
+        String testIP = "192.168.1.1";
+
+        LoginRequest request = LoginRequest.builder().email(testEmail).password(testPassword).build();
+        User user = User.builder().email(testEmail).password(testPassword).build();
+
+        when(loginAttemptService.isBlocked(testIP)).thenReturn(false);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(user));
+        lenient().when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(jwtService.generateToken(user)).thenReturn(expectedToken);
+        doNothing().when(loginAttemptService).loginSucceeded(testIP);
+        lenient().doNothing().when(loginAttemptService).loginFailed(testIP);
+
+        String actualToken = authService.loginUser(request,testIP);
+
+        assertNotNull(actualToken);
+        assertEquals(expectedToken, actualToken);
+
+        verify(userRepository).findByEmail(testEmail);
+        verify(jwtService).generateToken(user);
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+
+
+}

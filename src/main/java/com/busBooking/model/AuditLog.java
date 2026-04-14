@@ -1,0 +1,39 @@
+package com.busBooking.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Data
+@Table(name = "audit_logs")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuditLog {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long idAuditLog;
+
+
+    @ManyToOne
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
+
+    @Column(nullable = false)
+    private String action;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LevelLogin levelLogin;
+
+    @CreationTimestamp
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
+
+    private String details;
+
+}

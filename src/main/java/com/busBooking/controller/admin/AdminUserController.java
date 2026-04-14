@@ -1,0 +1,42 @@
+package com.busBooking.controller.admin;
+
+
+import com.busBooking.model.Admin;
+import com.busBooking.model.User;
+import com.busBooking.service.admin.AdminUserService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@AllArgsConstructor
+@RestController
+@RequestMapping("/api/admin/user")
+public class AdminUserController {
+
+  private final AdminUserService adminUserService;
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUser(){
+
+        return ResponseEntity.ok(adminUserService.getUsers());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable long id){
+
+        adminUserService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody Admin userDetails) {
+
+        Admin newUser = adminUserService.updateUser(id, userDetails);
+        return ResponseEntity.ok(newUser);
+
+    }
+
+}
